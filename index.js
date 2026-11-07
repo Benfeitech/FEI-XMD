@@ -17,8 +17,6 @@ const logger = pino({ level: 'silent' })
 
 const sentIds = new Set()
 
-const delay = (ms) => new Promise((r) => setTimeout(r, ms))
-
 function ask(question) {
   const rl = readline.createInterface({ input, output })
   return rl.question(question).finally(() => rl.close())
@@ -82,6 +80,7 @@ function serialize(msg, sock) {
         ...(ctx.participantAlt ? { participantAlt: ctx.participantAlt } : {}),
       },
       message: ctx.quotedMessage,
+      secret: ctx.quotedMessage?.messageContextInfo?.messageSecret || null,
     }
   }
 
@@ -104,81 +103,97 @@ function serialize(msg, sock) {
 /* ── commands ─────────────────────────────────────────────────────────────── */
 
 async function ping(sock, m, started) {
-  const latency = Date.now() - started
-  await m.reply(
-    `Pong! ${latency}ms\nBaileys: ${sock.__version || 'unknown'}\nChat: ${m.isGroup ? 'group' : 'dm'}`
-  )
+  await m.reply(`Pong! ${Date.now() - started}ms\nBaileys: ${sock.__version || 'unknown'}\nChat: ${m.isGroup ? 'group' : 'dm'}`)
 }
 
 async function jid(sock, m) {
-  const lines = [
-    `chat: ${m.chat}`,
-    `sender: ${m.sender}`,
-    `self: ${sock.user?.id}`,
-  ]
+  const lines = [`chat: ${m.chat}`, `sender: ${m.sender}`, `self: ${sock.user?.id}`]
   if (m.quoted) {
     lines.push(
       `quoted.id: ${m.quoted.key.id}`,
       `quoted.participant: ${m.quoted.key.participant}`,
-      `quoted.participantAlt: ${m.quoted.key.participantAlt}`
+      `quoted.participantAlt: ${m.quoted.key.participantAlt}`,
+      `quoted.secret: ${m.quoted.secret ? 'present' : 'absent'}`
     )
-  } else {
-    lines.push('quoted: none')
-  }
+  } else lines.push('quoted: none')
   await m.reply(lines.join('\n'))
 }
 
 function buildTargetKey(m) {
   const k = m.quoted?.key
   if (!k?.id) return null
+  // fromMe:true — clients invert this relative to the stanza sender, so true
+  // means "the message that belongs to whoever sent this stanza".
   return {
     remoteJid: m.chat,
-    fromMe: false,
+    fromMe: true,
     id: k.id,
     participant: k.participant || k.remoteJid,
     ...(k.participantAlt ? { participantAlt: k.participantAlt } : {}),
   }
 }
 
-// ── fakemsg: proper edit, sent through the normal pipeline ────────────────
-async function fakemsg(sock, m, args) {
-  const newText = args.join(' ').trim()
-  if (!m.quoted) return m.reply('⚠️ Reply to the message you want to replace.')
-  if (!newText) return m.reply('⚠️ Provide new text.\n\nExample: .fakemsg This is the fake message')
-
-  const key = buildTargetKey(m)
-  if (!key) return m.reply('❌ No message id on the quoted message.')
-
-  try {
-    const sent = await sock.sendMessage(
-      m.chat,
-      { text: newText, edit: key },
-      { messageId: key.id }
-    )
-    sentIds.add(sent?.key?.id || key.id)
-    await m.reply(`✅ edit sent\nkey.id=${key.id}\nparticipant=${key.participant}\nreturned=${sent?.key?.id}`)
-  } catch (e) {
-    logger.error({ err: e }, 'fakemsg failed')
-    await m.reply(`❌ Failed: ${e.message}`)
-  }
+function ctxInfo(m, groupStatus) {
+  const c = { isGroupStatus: groupStatus }
+  if (m.quoted?.secret) c.messageSecret = m.quoted.secret
+  return c
 }
 
-// ── fakeplain: no edit, just a collision on the message id ────────────────
-async function fakeplain(sock, m, args) {
-  const newText = args.join(' ').trim()
-  if (!m.quoted) return m.reply('⚠️ Reply to the message you want to replace.')
-  if (!newText) return m.reply('⚠️ Provide new text.')
-
+// probe A — edit via sendMessage
+async function probeA(sock, m, text) {
   const key = buildTargetKey(m)
-  if (!key) return m.reply('❌ No message id on the quoted message.')
+  if (!key) return null
+  const sent = await sock.sendMessage(
+    m.chat,
+    { text, edit: key, messageContextInfo: { messageSecret: m.quoted.secret || undefined } },
+    { messageId: key.id }
+  )
+  sentIds.add(sent?.key?.id || key.id)
+  return sent?.key?.id
+}
+
+// probe B — bare relayMessage
+async function probeB(sock, m, text) {
+  const key = buildTargetKey(m)
+  if (!key) return null
+  await sock.relayMessage(
+    m.chat,
+    {
+      protocolMessage: {
+        key,
+        type: 14,
+        timestamp: Date.now(),
+        editedMessage: {
+          extendedTextMessage: { text, contextInfo: ctxInfo(m, false) },
+        },
+      },
+    },
+    { messageId: key.id }
+  )
+  return key.id
+}
+
+// probe C — plain collision, no edit envelope
+async function probeC(sock, m, text) {
+  const key = buildTargetKey(m)
+  if (!key) return null
+  const sent = await sock.sendMessage(m.chat, { text }, { messageId: key.id })
+  sentIds.add(sent?.key?.id || key.id)
+  return sent?.key?.id
+}
+
+async function run(sock, m, args, label, fn) {
+  const text = args.join(' ').trim()
+  if (!m.quoted) return m.reply('⚠️ Reply to the message you want to replace.')
+  if (!text) return m.reply('⚠️ Provide new text.')
 
   try {
-    const sent = await sock.sendMessage(m.chat, { text: newText }, { messageId: key.id })
-    sentIds.add(sent?.key?.id || key.id)
-    await m.reply(`✅ plain collision sent\nreturned=${sent?.key?.id}`)
+    const id = await fn(sock, m, text)
+    if (!id) return m.reply('❌ No message id on the quoted message.')
+    await m.reply(`✅ ${label}\nreturned=${id}\nsecret=${m.quoted?.secret ? 'present' : 'absent'}`)
   } catch (e) {
-    logger.error({ err: e }, 'fakeplain failed')
-    await m.reply(`❌ Failed: ${e.message}`)
+    logger.error({ err: e }, label)
+    await m.reply(`❌ ${label}: ${e.message}`)
   }
 }
 
@@ -219,20 +234,18 @@ async function start() {
         const raw = await ask('\nEnter WhatsApp number (country code, digits only, no + or spaces): ')
         const phone = raw.replace(/\D/g, '')
         if (phone.length < 10) throw new Error('number too short — include the country code')
-
         const code = await sock.requestPairingCode(phone)
         console.log(`\n  Pairing code:  ${code}\n`)
         console.log('  On your phone: WhatsApp > Settings > Linked devices > Link with phone number\n')
       } catch (e) {
         console.error(`\nPairing code failed: ${e.message}\n`)
-        console.log('Falling back to QR — scan it in Linked devices > Link a device:\n')
         qrcode.generate(qr, { small: true })
       }
     }
 
     if (connection === 'open') {
       console.log(`\nConnected as ${sock.user?.id}`)
-      console.log(`Prefix: "${PREFIX}"   Commands: ${PREFIX}ping  ${PREFIX}jid  ${PREFIX}fakemsg  ${PREFIX}fakeplain\n`)
+      console.log(`Commands: ${PREFIX}ping ${PREFIX}jid ${PREFIX}fa ${PREFIX}fb ${PREFIX}fc\n`)
     }
 
     if (connection === 'close') {
@@ -257,9 +270,7 @@ async function start() {
         if (sentIds.has(raw.key.id)) continue
 
         const m = serialize(raw, sock)
-        if (DEBUG) {
-          console.log('[msg]', m.chat, raw.key.fromMe ? 'out' : 'in', JSON.stringify(m.text).slice(0, 60))
-        }
+        if (DEBUG) console.log('[msg]', m.chat, raw.key.fromMe ? 'out' : 'in', JSON.stringify(m.text).slice(0, 60))
 
         if (!m.text.startsWith(PREFIX)) continue
 
@@ -269,8 +280,10 @@ async function start() {
 
         if (command === 'ping') await ping(sock, m, started)
         else if (command === 'jid') await jid(sock, m)
-        else if (['fakemsg', 'fake', 'editmsg'].includes(command)) await fakemsg(sock, m, args)
-        else if (command === 'fakeplain') await fakeplain(sock, m, args)
+        else if (command === 'fa') await run(sock, m, args, 'probe A: sendMessage edit', probeA)
+        else if (command === 'fb') await run(sock, m, args, 'probe B: bare relay', probeB)
+        else if (command === 'fc') await run(sock, m, args, 'probe C: plain collision', probeC)
+        else if (['fakemsg', 'fake', 'editmsg'].includes(command)) await run(sock, m, args, 'probe A: sendMessage edit', probeA)
       } catch (e) {
         logger.error({ err: e }, 'handler')
         console.error('[handler]', e.message)
