@@ -1,7 +1,6 @@
 import makeWASocket, {
   useMultiFileAuthState,
   fetchLatestBaileysVersion,
-  generateMessageIDV2,
   jidNormalizedUser,
   Browsers,
   DisconnectReason,
@@ -118,73 +117,67 @@ async function jid(sock, m) {
     `self: ${sock.user?.id}`,
   ]
   if (m.quoted) {
-    lines.push(`quoted.id: ${m.quoted.key.id}`, `quoted.participant: ${m.quoted.key.participant}`)
+    lines.push(
+      `quoted.id: ${m.quoted.key.id}`,
+      `quoted.participant: ${m.quoted.key.participant}`,
+      `quoted.participantAlt: ${m.quoted.key.participantAlt}`
+    )
+  } else {
+    lines.push('quoted: none')
   }
   await m.reply(lines.join('\n'))
 }
 
-// ── fakemsg / fake / editmsg ───────────────────────────────────────────────
-async function fakemsg(sock, m, args) {
-  const newText = args.join(' ').trim()
-  const quoted = m.quoted
-
-  if (!quoted) return m.reply('⚠️ Reply to the message you want to replace.')
-  if (!newText) return m.reply('⚠️ Provide new text.\n\nExample: .fakemsg This is the fake message')
-
-  const targetId = quoted.key.id
-  if (!targetId) return m.reply('❌ No message id on the quoted message.')
-
-  // fromMe:false is correct relative to us AND to every recipient.
-  // The only device it is wrong on is the author's, which is why they keep
-  // their original text. participant is required for group resolution.
-  const targetKey = {
+function buildTargetKey(m) {
+  const k = m.quoted?.key
+  if (!k?.id) return null
+  return {
     remoteJid: m.chat,
     fromMe: false,
-    id: targetId,
-    participant: quoted.key.participant || quoted.key.remoteJid,
-    ...(quoted.key.participantAlt ? { participantAlt: quoted.key.participantAlt } : {}),
+    id: k.id,
+    participant: k.participant || k.remoteJid,
+    ...(k.participantAlt ? { participantAlt: k.participantAlt } : {}),
   }
+}
+
+// ── fakemsg: proper edit, sent through the normal pipeline ────────────────
+async function fakemsg(sock, m, args) {
+  const newText = args.join(' ').trim()
+  if (!m.quoted) return m.reply('⚠️ Reply to the message you want to replace.')
+  if (!newText) return m.reply('⚠️ Provide new text.\n\nExample: .fakemsg This is the fake message')
+
+  const key = buildTargetKey(m)
+  if (!key) return m.reply('❌ No message id on the quoted message.')
 
   try {
-    // 1) anchor: a throwaway we own, hidden via isGroupStatus
-    const anchorId = generateMessageIDV2(sock.user?.id)
-    sentIds.add(anchorId)
-    await sock.relayMessage(
+    const sent = await sock.sendMessage(
       m.chat,
-      { extendedTextMessage: { text: '', contextInfo: { isGroupStatus: true } } },
-      { messageId: anchorId }
+      { text: newText, edit: key },
+      { messageId: key.id }
     )
-
-    // 2) the shell: delivered under the TARGET's id, targeting the TARGET's key
-    await sock.relayMessage(
-      m.chat,
-      {
-        protocolMessage: {
-          key: targetKey,
-          type: 14, // proto.Message.ProtocolMessage.Type.MESSAGE_EDIT
-          timestamp: Date.now(),
-          editedMessage: {
-            extendedTextMessage: {
-              text: newText,
-              contextInfo: { isGroupStatus: false },
-            },
-          },
-        },
-      },
-      { messageId: targetId }
-    )
-
-    // 3) settle, then bin the anchor ONLY. Never revoke the target.
-    await delay(600)
-    await sock
-      .sendMessage(m.chat, {
-        delete: { remoteJid: m.chat, fromMe: true, id: anchorId, participant: sock.user?.id },
-      })
-      .catch(() => {})
-
-    await m.reply('✅ Replaced.')
+    sentIds.add(sent?.key?.id || key.id)
+    await m.reply(`✅ edit sent\nkey.id=${key.id}\nparticipant=${key.participant}\nreturned=${sent?.key?.id}`)
   } catch (e) {
     logger.error({ err: e }, 'fakemsg failed')
+    await m.reply(`❌ Failed: ${e.message}`)
+  }
+}
+
+// ── fakeplain: no edit, just a collision on the message id ────────────────
+async function fakeplain(sock, m, args) {
+  const newText = args.join(' ').trim()
+  if (!m.quoted) return m.reply('⚠️ Reply to the message you want to replace.')
+  if (!newText) return m.reply('⚠️ Provide new text.')
+
+  const key = buildTargetKey(m)
+  if (!key) return m.reply('❌ No message id on the quoted message.')
+
+  try {
+    const sent = await sock.sendMessage(m.chat, { text: newText }, { messageId: key.id })
+    sentIds.add(sent?.key?.id || key.id)
+    await m.reply(`✅ plain collision sent\nreturned=${sent?.key?.id}`)
+  } catch (e) {
+    logger.error({ err: e }, 'fakeplain failed')
     await m.reply(`❌ Failed: ${e.message}`)
   }
 }
@@ -239,7 +232,7 @@ async function start() {
 
     if (connection === 'open') {
       console.log(`\nConnected as ${sock.user?.id}`)
-      console.log(`Prefix: "${PREFIX}"   Commands: ${PREFIX}ping  ${PREFIX}jid  ${PREFIX}fakemsg\n`)
+      console.log(`Prefix: "${PREFIX}"   Commands: ${PREFIX}ping  ${PREFIX}jid  ${PREFIX}fakemsg  ${PREFIX}fakeplain\n`)
     }
 
     if (connection === 'close') {
@@ -277,6 +270,7 @@ async function start() {
         if (command === 'ping') await ping(sock, m, started)
         else if (command === 'jid') await jid(sock, m)
         else if (['fakemsg', 'fake', 'editmsg'].includes(command)) await fakemsg(sock, m, args)
+        else if (command === 'fakeplain') await fakeplain(sock, m, args)
       } catch (e) {
         logger.error({ err: e }, 'handler')
         console.error('[handler]', e.message)
