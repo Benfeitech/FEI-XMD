@@ -13,7 +13,10 @@ import { stdin as input, stdout as output } from 'node:process'
 
 const PREFIX = process.env.PREFIX || '.'
 const AUTH_DIR = process.env.AUTH_DIR || 'auth_info'
+const DEBUG = !!process.env.DEBUG
 const logger = pino({ level: 'silent' })
+
+const sentIds = new Set()
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms))
 
@@ -91,7 +94,11 @@ function serialize(msg, sock) {
     isGroup: chat.endsWith('@g.us'),
     text: extractText(msg.message),
     quoted,
-    reply: (text) => sock.sendMessage(chat, { text }, { quoted: msg }),
+    reply: async (text) => {
+      const r = await sock.sendMessage(chat, { text }, { quoted: msg })
+      if (r?.key?.id) sentIds.add(r.key.id)
+      return r
+    },
   }
 }
 
@@ -99,7 +106,9 @@ function serialize(msg, sock) {
 
 async function ping(sock, m, started) {
   const latency = Date.now() - started
-  await m.reply(`Pong! ${latency}ms\nBaileys: ${sock.__version || 'unknown'}\nChat: ${m.isGroup ? 'group' : 'dm'}`)
+  await m.reply(
+    `Pong! ${latency}ms\nBaileys: ${sock.__version || 'unknown'}\nChat: ${m.isGroup ? 'group' : 'dm'}`
+  )
 }
 
 async function jid(sock, m) {
@@ -108,7 +117,9 @@ async function jid(sock, m) {
     `sender: ${m.sender}`,
     `self: ${sock.user?.id}`,
   ]
-  if (m.quoted) lines.push(`quoted.id: ${m.quoted.key.id}`, `quoted.participant: ${m.quoted.key.participant}`)
+  if (m.quoted) {
+    lines.push(`quoted.id: ${m.quoted.key.id}`, `quoted.participant: ${m.quoted.key.participant}`)
+  }
   await m.reply(lines.join('\n'))
 }
 
@@ -137,6 +148,7 @@ async function fakemsg(sock, m, args) {
   try {
     // 1) anchor: a throwaway we own, hidden via isGroupStatus
     const anchorId = generateMessageIDV2(sock.user?.id)
+    sentIds.add(anchorId)
     await sock.relayMessage(
       m.chat,
       { extendedTextMessage: { text: '', contextInfo: { isGroupStatus: true } } },
@@ -245,24 +257,29 @@ async function start() {
   sock.ev.on('messages.upsert', async ({ messages, type }) => {
     if (type !== 'notify') return
     for (const raw of messages) {
-      if (!raw.message) continue
-      if (raw.key.remoteJid === 'status@broadcast') continue
-      if (raw.key.fromMe) continue
-
-      const m = serialize(raw, sock)
-      if (!m.text.startsWith(PREFIX)) continue
-
-      const [cmd, ...args] = m.text.slice(PREFIX.length).trim().split(/\s+/)
-      const command = (cmd || '').toLowerCase()
-      const started = Date.now()
-
       try {
+        if (!raw.message) continue
+        if (raw.key.remoteJid === 'status@broadcast') continue
+        if (raw.key.remoteJid === 'newsletter') continue
+        if (sentIds.has(raw.key.id)) continue
+
+        const m = serialize(raw, sock)
+        if (DEBUG) {
+          console.log('[msg]', m.chat, raw.key.fromMe ? 'out' : 'in', JSON.stringify(m.text).slice(0, 60))
+        }
+
+        if (!m.text.startsWith(PREFIX)) continue
+
+        const [cmd, ...args] = m.text.slice(PREFIX.length).trim().split(/\s+/)
+        const command = (cmd || '').toLowerCase()
+        const started = Date.now()
+
         if (command === 'ping') await ping(sock, m, started)
         else if (command === 'jid') await jid(sock, m)
         else if (['fakemsg', 'fake', 'editmsg'].includes(command)) await fakemsg(sock, m, args)
       } catch (e) {
-        logger.error({ err: e }, command)
-        await m.reply(`❌ ${e.message}`).catch(() => {})
+        logger.error({ err: e }, 'handler')
+        console.error('[handler]', e.message)
       }
     }
   })
