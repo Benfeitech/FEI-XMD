@@ -8,6 +8,7 @@ import makeWASocket, {
 import pino from 'pino'
 import qrcode from 'qrcode-terminal'
 import readline from 'node:readline/promises'
+import { randomBytes } from 'node:crypto'
 import { stdin as input, stdout as output } from 'node:process'
 
 const PREFIX = process.env.PREFIX || '.'
@@ -22,7 +23,7 @@ function ask(question) {
   return rl.question(question).finally(() => rl.close())
 }
 
-/* ── message helpers ──────────────────────────────────────────────────────── */
+/* ── helpers ──────────────────────────────────────────────────────────────── */
 
 const UNWRAP = [
   'ephemeralMessage', 'viewOnceMessage', 'viewOnceMessageV2',
@@ -70,13 +71,12 @@ function serialize(msg, sock) {
 
   let quoted = null
   if (ctx?.quotedMessage) {
-    const p = ctx.participant || null
     quoted = {
       key: {
         remoteJid: chat,
-        fromMe: !!p && jidNormalizedUser(p) === self,
+        fromMe: !!ctx.participant && jidNormalizedUser(ctx.participant) === self,
         id: ctx.stanzaId,
-        participant: p,
+        participant: ctx.participant || null,
         ...(ctx.participantAlt ? { participantAlt: ctx.participantAlt } : {}),
       },
       message: ctx.quotedMessage,
@@ -100,62 +100,55 @@ function serialize(msg, sock) {
   }
 }
 
-/* ── commands ─────────────────────────────────────────────────────────────── */
+/* ── diagnostics ──────────────────────────────────────────────────────────── */
 
-async function ping(sock, m, started) {
-  await m.reply(`Pong! ${Date.now() - started}ms\nBaileys: ${sock.__version || 'unknown'}\nChat: ${m.isGroup ? 'group' : 'dm'}`)
-}
+async function diag(sock, m) {
+  const out = [
+    `self.id:  ${sock.user?.id}`,
+    `self.lid: ${sock.user?.lid}`,
+    `chat:     ${m.chat}`,
+    `sender:   ${m.sender}`,
+  ]
+  if (!m.quoted) {
+    out.push('quoted: none')
+    return m.reply(out.join('\n'))
+  }
+  out.push(`quoted.id: ${m.quoted.key.id}`, `quoted.participant: ${m.quoted.key.participant}`)
 
-async function jid(sock, m) {
-  const lines = [`chat: ${m.chat}`, `sender: ${m.sender}`, `self: ${sock.user?.id}`]
-  if (m.quoted) {
-    lines.push(
-      `quoted.id: ${m.quoted.key.id}`,
-      `quoted.participant: ${m.quoted.key.participant}`,
-      `quoted.participantAlt: ${m.quoted.key.participantAlt}`,
-      `quoted.secret: ${m.quoted.secret ? 'present' : 'absent'}`
+  try {
+    const meta = await sock.groupMetadata(m.chat)
+    out.push(`group: ${meta.subject} (${meta.participants.length} members)`)
+    const entry = meta.participants.find(
+      (p) => p.id === m.quoted.key.participant || p.phoneNumber === m.quoted.key.participant
     )
-  } else lines.push('quoted: none')
-  await m.reply(lines.join('\n'))
+    out.push(
+      `entry: ${entry ? JSON.stringify({ id: entry.id, phoneNumber: entry.phoneNumber, admin: entry.admin }) : 'NOT FOUND'}`
+    )
+    const selfEntry = meta.participants.find((p) => p.phoneNumber && sock.user?.id?.startsWith(p.phoneNumber))
+    out.push(`selfEntry: ${selfEntry ? JSON.stringify({ id: selfEntry.id, phoneNumber: selfEntry.phoneNumber }) : 'NOT FOUND'}`)
+  } catch (e) {
+    out.push(`metadata error: ${e.message}`)
+  }
+
+  await m.reply(out.join('\n'))
 }
 
-function buildTargetKey(m) {
+/* ── probes ───────────────────────────────────────────────────────────────── */
+
+function baseKey(m) {
   const k = m.quoted?.key
   if (!k?.id) return null
-  // fromMe:true — clients invert this relative to the stanza sender, so true
-  // means "the message that belongs to whoever sent this stanza".
-  return {
-    remoteJid: m.chat,
-    fromMe: true,
-    id: k.id,
-    participant: k.participant || k.remoteJid,
-    ...(k.participantAlt ? { participantAlt: k.participantAlt } : {}),
-  }
+  return { remoteJid: m.chat, fromMe: true, id: k.id, participant: k.participant || k.remoteJid }
 }
 
-function ctxInfo(m, groupStatus) {
-  const c = { isGroupStatus: groupStatus }
-  if (m.quoted?.secret) c.messageSecret = m.quoted.secret
-  return c
-}
-
-// probe A — edit via sendMessage
-async function probeA(sock, m, text) {
-  const key = buildTargetKey(m)
+async function relayEdit(sock, m, text, { participant, secret } = {}) {
+  const key = baseKey(m)
   if (!key) return null
-  const sent = await sock.sendMessage(
-    m.chat,
-    { text, edit: key, messageContextInfo: { messageSecret: m.quoted.secret || undefined } },
-    { messageId: key.id }
-  )
-  sentIds.add(sent?.key?.id || key.id)
-  return sent?.key?.id
-}
+  if (participant) key.participant = participant
 
-// probe B — bare relayMessage
-async function probeB(sock, m, text) {
-  const key = buildTargetKey(m)
-  if (!key) return null
+  const contextInfo = { isGroupStatus: false }
+  if (secret) contextInfo.messageSecret = secret
+
   await sock.relayMessage(
     m.chat,
     {
@@ -163,34 +156,32 @@ async function probeB(sock, m, text) {
         key,
         type: 14,
         timestamp: Date.now(),
-        editedMessage: {
-          extendedTextMessage: { text, contextInfo: ctxInfo(m, false) },
-        },
+        editedMessage: { extendedTextMessage: { text, contextInfo } },
       },
     },
-    { messageId: key.id }
+    { messageId: key.id, additionalAttributes: { edit: '1' } }
   )
   return key.id
 }
 
-// probe C — plain collision, no edit envelope
-async function probeC(sock, m, text) {
-  const key = buildTargetKey(m)
-  if (!key) return null
-  const sent = await sock.sendMessage(m.chat, { text }, { messageId: key.id })
-  sentIds.add(sent?.key?.id || key.id)
-  return sent?.key?.id
+async function resolvePn(sock, m) {
+  try {
+    const meta = await sock.groupMetadata(m.chat)
+    const entry = meta.participants.find((p) => p.id === m.quoted?.key?.participant)
+    return entry?.phoneNumber || null
+  } catch {
+    return null
+  }
 }
 
 async function run(sock, m, args, label, fn) {
   const text = args.join(' ').trim()
   if (!m.quoted) return m.reply('⚠️ Reply to the message you want to replace.')
   if (!text) return m.reply('⚠️ Provide new text.')
-
   try {
     const id = await fn(sock, m, text)
     if (!id) return m.reply('❌ No message id on the quoted message.')
-    await m.reply(`✅ ${label}\nreturned=${id}\nsecret=${m.quoted?.secret ? 'present' : 'absent'}`)
+    await m.reply(`✅ ${label}\nreturned=${id}`)
   } catch (e) {
     logger.error({ err: e }, label)
     await m.reply(`❌ ${label}: ${e.message}`)
@@ -245,7 +236,7 @@ async function start() {
 
     if (connection === 'open') {
       console.log(`\nConnected as ${sock.user?.id}`)
-      console.log(`Commands: ${PREFIX}ping ${PREFIX}jid ${PREFIX}fa ${PREFIX}fb ${PREFIX}fc\n`)
+      console.log(`Commands: ${PREFIX}diag ${PREFIX}fa ${PREFIX}fb ${PREFIX}fc ${PREFIX}fd\n`)
     }
 
     if (connection === 'close') {
@@ -276,14 +267,28 @@ async function start() {
 
         const [cmd, ...args] = m.text.slice(PREFIX.length).trim().split(/\s+/)
         const command = (cmd || '').toLowerCase()
-        const started = Date.now()
 
-        if (command === 'ping') await ping(sock, m, started)
-        else if (command === 'jid') await jid(sock, m)
-        else if (command === 'fa') await run(sock, m, args, 'probe A: sendMessage edit', probeA)
-        else if (command === 'fb') await run(sock, m, args, 'probe B: bare relay', probeB)
-        else if (command === 'fc') await run(sock, m, args, 'probe C: plain collision', probeC)
-        else if (['fakemsg', 'fake', 'editmsg'].includes(command)) await run(sock, m, args, 'probe A: sendMessage edit', probeA)
+        if (command === 'diag') await diag(sock, m)
+        else if (command === 'fa') await run(sock, m, args, 'fa: edit attr + lid', (s, mm, t) => relayEdit(s, mm, t))
+        else if (command === 'fb')
+          await run(sock, m, args, 'fb: edit attr + pn', async (s, mm, t) => {
+            const pn = await resolvePn(s, mm)
+            return relayEdit(s, mm, t, { participant: pn || undefined })
+          })
+        else if (command === 'fc')
+          await run(sock, m, args, 'fc: edit attr + random secret', (s, mm, t) =>
+            relayEdit(s, mm, t, { secret: randomBytes(32) })
+          )
+        else if (command === 'fd')
+          await run(sock, m, args, 'fd: plain + edit attr', async (s, mm, t) => {
+            const key = baseKey(mm)
+            if (!key) return null
+            const sent = await s.sendMessage(mm.chat, { text: t }, { messageId: key.id, additionalAttributes: { edit: '1' } })
+            sentIds.add(sent?.key?.id || key.id)
+            return sent?.key?.id
+          })
+        else if (['fakemsg', 'fake', 'editmsg'].includes(command))
+          await run(sock, m, args, 'fa: edit attr + lid', (s, mm, t) => relayEdit(s, mm, t))
       } catch (e) {
         logger.error({ err: e }, 'handler')
         console.error('[handler]', e.message)
