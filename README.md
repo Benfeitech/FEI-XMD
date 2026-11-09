@@ -6,12 +6,14 @@
 
 <p align="center">
   <a href="https://github.com/Benfeitech/FEI-XMD">
-    <img src="https://img.shields.io/badge/Star-Project-f1c40f?style=for-the-badge&logo=github&logoColor=white" alt="Star FEI XMD on GitHub">
+    <img src="https://img.shields.io/badge/⭐_Star_this_repo-top_right_corner-f1c40f?style=for-the-badge&logo=github&logoColor=white" alt="Star FEI XMD on GitHub">
   </a>
   <a href="https://github.com/Benfeitech/FEI-XMD/fork">
     <img src="https://img.shields.io/badge/Fork-Project-2ea44f?style=for-the-badge&logo=github&logoColor=white" alt="Fork FEI XMD on GitHub">
   </a>
 </p>
+
+<p align="center"><i>Like FEI XMD? Tap the ⭐ <b>Star</b> button at the top of this page to support the project.</i></p>
 
 <p align="center">
   <a href="https://fei-xmd.benfeilab.com">
