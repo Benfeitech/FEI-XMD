@@ -23,7 +23,7 @@ The official product identity is **FEI XMD WhatsApp Bot | Official Pairing by Be
 | Developer and publisher | [Benfei Tech](https://benfeitech.com) |
 | Official pairing website | [https://fei-xmd.benfeilab.com](https://fei-xmd.benfeilab.com) |
 | Main bot source code | [github.com/Benfeitech/FEI-XMD](https://github.com/Benfeitech/FEI-XMD) |
-| WhatsApp newsletter | [𝐁𝐄𝐍𝐅𝐄𝐈 𝐓𝐄𝐂𝐇 ™](https://whatsapp.com/channel/0029VbCwtVY65yDBVR9uhJ02) |
+| WhatsApp Channel | [𝐁𝐄𝐍𝐅𝐄𝐈 𝐓𝐄𝐂𝐇 ™](https://whatsapp.com/channel/0029VbCwtVY65yDBVR9uhJ02) |
 | YouTube | [@benfeitech](https://www.youtube.com/@benfeitech) |
 | Telegram | [t.me/benfeitech](https://t.me/benfeitech) |
 | Support | [WhatsApp Benfei Tech](https://wa.me/2349060715145) |
