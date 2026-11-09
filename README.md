@@ -172,9 +172,9 @@ This repository does not install the separate KaluLabs Baileys fork used by othe
 
 ## Privacy and public-release boundaries
 
-The public FEI XMD command set deliberately avoids features that collect or expose more private account or chat information than needed. It excludes group-chat history collection and AI summaries of private conversations, live-presence tracking, view-once recovery, anti-delete/anti-edit monitoring, read-receipt controls, automatic status viewing or reacting, contact blocking and privileged owner/session administration.
+The public FEI XMD command set deliberately avoids features that collect or expose more private account or chat information than needed. It excludes group-chat history collection and AI summaries of private conversations, live-presence tracking, view-once recovery, anti-delete/anti-edit monitoring, read-receipt controls and contact blocking and privileged owner/session administration.
 
-Group-setting commands apply permission checks. Invite-link retrieval and member tagging are restricted to group admins, and member tagging is capped. Welcome and goodbye messages are disabled by default; their settings are stored separately from chat history.
+Group-setting commands apply permission checks. Invite-link retrieval and member tagging are restricted to group admins, and member tagging is capped. Welcome and goodbye messages are disabled by default; their settings are stored separately from chat history. Status auto-view and reactions are owner-controlled and disabled by default.
 
 The Chat Privacy command explains these boundaries. Status Tools include owner-controlled automatic status viewing and reactions (both off by default), with a selectable rotating emoji pool and optional keyword filter. Group-status publishing is available only when explicitly invoked by the configured owner. Group link moderation is off by default and must be enabled in each group. Owner Tools only shows basic process uptime and connection status.
 
