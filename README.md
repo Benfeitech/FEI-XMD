@@ -125,7 +125,7 @@ You can also use:
 npm run local
 ~~~
 
-The default owner is **Benfei Tech**, with one configured owner number: **2349060715145**. The OWNER_NUMBER environment variable can override this value for a private deployment. Do not add a second owner number to this public configuration.
+The default owner is **Benfei Tech**, with one configured owner number: **2349060715145**. The OWNER_NUMBER environment variable can override this value for a private deployment. Do not add a second owner number to this public configuration.\n\n### Choose any command prefix\n\nSet `PREFIX` in your `.env` file to any non-empty string you want. FEI XMD uses that exact value when detecting commands; it is not restricted to a single punctuation character. Examples:\n\n~~~dotenv\nPREFIX=!\n# or\nPREFIX=!!\n# or\nPREFIX=fei\n# or\nPREFIX=#\n~~~\n\nAfter changing the prefix, restart FEI XMD. With `PREFIX=fei`, for example, use `feimenu` instead of `.menu`. If your chosen prefix contains spaces or dotenv-special characters, wrap the value in double quotes, for example `PREFIX="my prefix "`.
 
 ### Main configuration
 
@@ -133,7 +133,7 @@ The default owner is **Benfei Tech**, with one configured owner number: **234906
 | --- | --- | --- |
 | BOT_NAME | WhatsApp bot display name | FEI XMD |
 | BOT_VERSION | Displayed bot version | 1.0.0 |
-| PREFIX | Command prefix | . |
+| PREFIX | Any non-empty command prefix; supports symbols, words and multi-character strings | . |
 | OWNER_NAME | Configured owner/developer name | Benfei Tech |
 | OWNER_NUMBER | The single owner WhatsApp number, digits only | 2349060715145 |
 | BOT_URL | Official pairing website shown with the menu artwork | https://fei-xmd.benfeilab.com |
