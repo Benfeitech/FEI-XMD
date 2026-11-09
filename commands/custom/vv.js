@@ -22,13 +22,11 @@ function getQuotedKey(ctx) {
   ].map(normalizeJid).filter(Boolean);
 
   const key = {
-    remoteJid: String(ctx.jid || ""),
+    remoteJid: String(ctx.msg?.key?.remoteJid || ctx.jid || ""),
     id: String(info.stanzaId),
     fromMe: Boolean(participant && selfIds.includes(participant))
   };
-  if (participant && String(ctx.jid || "").endsWith("@g.us")) {
-    key.participant = participant;
-  }
+  if (participant) key.participant = participant;
   return key;
 }
 
