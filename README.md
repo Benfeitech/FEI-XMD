@@ -40,7 +40,7 @@ The official product identity is **FEI XMD WhatsApp Bot | Official Pairing by Be
 
 ## What can FEI XMD do?
 
-FEI XMD groups its **199 public commands into 18 menu sections**. The command menu is designed for WhatsApp conversations and groups, with feature-specific permission checks where an action affects group settings.
+FEI XMD groups its **202 public commands into 18 menu sections**. The command menu is designed for WhatsApp conversations and groups, with feature-specific permission checks where an action affects group settings.
 
 - **AI Chat:** chat with configured AI providers, ask questions, translate text, summarize content and use supported reasoning or writing tools.
 - **AI Media:** generate images from text prompts and convert text to speech using supported providers.
@@ -71,8 +71,8 @@ FEI XMD groups its **199 public commands into 18 menu sections**. The command me
 | Anime Reactions | hug, kabedon, kiss, lappillow, laugh, lurk, nod, nom, nope, nya, pat, peck, poke, pout, run, salute, shake |
 | Anime Moves | shocked, shrug, sip, sleep, smile, smug, spin, stare, teehee, think, thumbsup, tickle, wag, wave, wink, yawn, yeet |
 | Canvas Tools | wndwqute, canvasquote |
-| Media Tools | lyrics |
-| Chat Privacy | privacy |
+| Media Tools | lyrics, vv, vv2 |
+| Chat Privacy | privacy, antidelete |
 | Status Tools | statusdraft, statusideas, gcstatus, gcstatusdm, autostatus, autoview, statusreact, statusreactmode, statusreactkeys |
 | Owner Tools | runtime |
 
@@ -172,11 +172,11 @@ This repository does not install the separate KaluLabs Baileys fork used by othe
 
 ## Privacy and public-release boundaries
 
-The public FEI XMD command set deliberately avoids features that collect or expose more private account or chat information than needed. It excludes group-chat history collection and AI summaries of private conversations, live-presence tracking, view-once recovery, anti-delete/anti-edit monitoring, read-receipt controls and contact blocking and privileged owner/session administration.
+The public FEI XMD command set deliberately avoids features that collect or expose more private account or chat information than needed. It excludes group-chat history collection and AI summaries of private conversations, live-presence tracking, anti-edit monitoring, read-receipt controls and contact blocking. Anti-delete is opt-in per chat and uses a short-lived in-memory cache; it does not cache view-once messages. The .vv and .vv2 commands run only when explicitly invoked as a reply to view-once media.
 
-Group-setting commands apply permission checks. Invite-link retrieval and member tagging are restricted to group admins, and member tagging is capped. Welcome and goodbye messages are disabled by default; their settings are stored separately from chat history. Status auto-view and reactions are owner-controlled and disabled by default.
+Group-setting commands apply permission checks. Invite-link retrieval and member tagging are restricted to group admins, and member tagging is capped. Welcome and goodbye messages are disabled by default; their settings are stored separately from chat history. Status auto-view and reactions are owner-controlled and disabled by default. Anti-delete is off by default and only stores enabled-chat messages temporarily in memory.
 
-The Chat Privacy command explains these boundaries. Status Tools include owner-controlled automatic status viewing and reactions (both off by default), with a selectable rotating emoji pool and optional keyword filter. Group-status publishing is available only when explicitly invoked by the configured owner. Group link moderation is off by default and must be enabled in each group. Owner Tools only shows basic process uptime and connection status.
+The Chat Privacy command explains these boundaries. Status Tools include owner-controlled automatic status viewing and reactions (both off by default), with a selectable rotating emoji pool and optional keyword filter. Group-status publishing is available only when explicitly invoked by the configured owner. Group link moderation is off by default and must be enabled in each group. Anti-delete can be enabled with .antidelete on in each chat. Owner Tools only shows basic process uptime and connection status.
 
 ## Tests and validation
 
