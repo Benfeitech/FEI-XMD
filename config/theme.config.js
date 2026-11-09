@@ -10,11 +10,7 @@ export default Object.freeze({
   },
   sections: [
     { key: "General", title: "🏠 ɢᴇɴᴇʀᴀʟ" },
-    { key: "AI", title: "🧠 ᴀɪ & ᴄʜᴀᴛ" },
-    { key: "Group", title: "👥 ɢʀᴏᴜᴘ ᴛᴏᴏʟs" },
-    { key: "Downloads", title: "📥 ᴅᴏᴡɴʟᴏᴀᴅs" },
-    { key: "Fun", title: "🎮 ғᴜɴ & ɢᴀᴍᴇs" },
-    { key: "Media", title: "🛠️ ᴍᴇᴅɪᴀ ᴛᴏᴏʟs" },
-    { key: "Owner", title: "👑 ᴏᴡɴᴇʀ ᴛᴏᴏʟs" }
+    { key: "AI & Chat", title: "🧠 ᴀɪ ᴄʜᴀᴛ" },
+    { key: "AI Media", title: "🎨 ᴀɪ ᴍᴇᴅɪᴀ" }
   ]
 });
