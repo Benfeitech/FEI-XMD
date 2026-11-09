@@ -4,7 +4,7 @@ FEI XMD is a modular WhatsApp automation project developed by **Benfei Tech**. T
 
 ## Project status
 
-The runtime foundation and the first **70 commands** are in place across the first seven menu sections. Commands are loaded recursively from the commands/ directory and use a shared context compatible with the normal WhiskeySockets Baileys v7 package.
+The runtime foundation and the first **72 commands** are in place across the first seven menu sections. Commands are loaded recursively from the commands/ directory and use a shared context compatible with the normal WhiskeySockets Baileys v7 package.
 
 ### First seven menu sections
 
@@ -14,7 +14,7 @@ The runtime foundation and the first **70 commands** are in place across the fir
 | AI Chat | ai, ask, gpt, chatgpt, mathgpt, deepseek, translate, summarize, fable5, qwen, deepseek2 |
 | AI Media | flux, pollination, tts, tts2, tts3, tts4, tts5 |
 | News Desk | news, aljazeera, cnn, bbc, guardian, npr, nytimes, foxnews, skynews, dw, punchnews |
-| Group Tools | groupinfo, groupjid, getgcpp, groupcount, groupstats, admins, tagall, link, groupname, groupdesc, close, open |
+| Group Tools | welcome, goodbye, groupinfo, groupjid, getgcpp, groupcount, groupstats, admins, tagall, link, groupname, groupdesc, close, open |
 | Downloads | aio, fb, twitter, instagram, ytmp4, tiktok, play2, ytsearch, video |
 | Fun Games | calc, poll, coinflip, dice, 8ball, choose, trivia, riddle, activity |
 
@@ -59,6 +59,7 @@ The NabeesTech all-in-one downloader can use NABEES_API_KEY from the host enviro
 - lib/menu.js — category and explicit-name menu rendering.
 - lib/api-client.js — bounded JSON requests to allowlisted AI/media API providers, URL validation and response formatting.
 - lib/youtube-play.js — Ikyyxd YouTube audio lookup.
+- lib/group-greetings.js — separate per-group welcome/goodbye settings; no chat-history storage.
 - lib/math-expression.js — a small expression parser for the calculator (no eval).
 - lib/state-store.js — atomic JSON state persistence.
 - lib/database.js — optional PostgreSQL pool factory for future database-backed features.
