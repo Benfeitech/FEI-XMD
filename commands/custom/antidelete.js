@@ -1,99 +1,99 @@
-// Anti-delete retains incoming message metadata and eligible media for deletion reports.
-
-
-import { getChatSettings, setChatSetting, GLOBAL_ID } from "../../lib/feature-state.js";
-import { requireGroupAdmin } from "../../lib/groups.js";
+import {
+  getAntiDeleteSettings,
+  setAntiDeleteDelivery,
+  setAntiDeleteEnabled
+} from "../../lib/anti-delete.js";
+import { normalizeJid } from "../../lib/message-utils.js";
 
 async function canManage(ctx, label) {
-  if (ctx.jid.endsWith("@g.us")) {
-    return Boolean(await requireGroupAdmin(ctx, { requireBotAdmin: false }));
+  if (!String(ctx.jid || "").endsWith("@g.us")) {
+    if (ctx.owner) return true;
+    await ctx.reply("⛔ Only the bot owner can manage " + label + " in a private chat.");
+    return false;
   }
-  if (ctx.owner) return true;
-  await ctx.reply("⛔ Only the bot owner can manage " + label + " in a private chat.");
-  return false;
-}
 
-function normalizeTarget(raw) {
-  if (raw === "dm") return "dm";
-  if (raw === "both") return "both";
-  return "chat";
+  let metadata;
+  try {
+    metadata = await ctx.sock.groupMetadata(ctx.jid);
+  } catch {
+    await ctx.reply("Could not load this group. Try again when the connection is stable.");
+    return false;
+  }
+
+  const sender = normalizeJid(ctx.senderJid || "");
+  const isAdmin = Boolean(ctx.owner) || (metadata.participants || []).some(participant => {
+    const ids = [
+      participant?.id,
+      participant?.jid,
+      participant?.lid,
+      participant?.phoneNumber,
+      participant?.pn
+    ].map(normalizeJid);
+    const admin = participant?.admin === "admin" ||
+      participant?.admin === "superadmin" ||
+      participant?.isAdmin === true;
+    return admin && ids.includes(sender);
+  });
+
+  if (!isAdmin) {
+    await ctx.reply("⛔ Only a group admin or the configured bot owner can manage anti-delete here.");
+    return false;
+  }
+  return true;
 }
 
 function targetLabel(target) {
   if (target === "dm") return "your DM";
-  if (target === "both") return "your DM *and* the chat itself";
-  return "the chat where it happened";
+  if (target === "both") return "your DM and the original chat";
+  return "the original chat";
 }
 
-function statusText(prefix, name, settings, setting, target) {
-  return "⚙️ *" + name.toUpperCase() + "*\n" +
-    "• Status here: " + (settings[setting] ? "ON ✅" : "OFF 🔕") + "\n" +
+function statusText(prefix, enabled, target) {
+  return "🗑️ *ANTIDELETE*\n" +
+    "• Status here: " + (enabled ? "ON ✅" : "OFF 🔕") + "\n" +
     "• Delivery: " + targetLabel(target) + "\n\n" +
     "*Usage*\n" +
-    "• " + prefix + name + " on | off\n" +
-    "• " + prefix + name + " dm      → alerts to your DM\n" +
-    "• " + prefix + name + " group   → alerts in the chat itself\n" +
-    "• " + prefix + name + " both    → both at once\n" +
-    "• " + prefix + name + " on dm   → both options at once\n\n" +
-    "_Delivery is a global preference; on/off is per chat._";
+    "• " + prefix + "antidelete on/off — toggle in this chat\n" +
+    "• " + prefix + "antidelete dm — send alerts to your DM\n" +
+    "• " + prefix + "antidelete group — send alerts to the original chat\n" +
+    "• " + prefix + "antidelete both — send to both\n" +
+    "• " + prefix + "antidelete on dm — enable here and set DM delivery\n\n" +
+    "_Settings are saved. Message content is kept in a short-lived memory cache only._";
 }
 
-async function readTarget(targetKey) {
-  const g = await getChatSettings(GLOBAL_ID);
-  return normalizeTarget(g[targetKey]);
-}
+export default {
+  name: "antidelete",
+  aliases: ["antidel"],
+  category: "Chat & Privacy",
+  description: "Temporarily cache enabled-chat messages and report when one is deleted for everyone.",
+  run: async ctx => {
+    if (!await canManage(ctx, "anti-delete")) return;
 
-function makeAlertCommand(name, setting, targetKey, description) {
-  return {
-    name,
-    category: "Chat & Privacy",
-    description,
-    run: async ctx => {
-      if (!(await canManage(ctx, name))) return;
-
-      const prefix = ctx.config.prefix;
-      const words = String(ctx.args || "").toLowerCase().split(/\s+/).filter(Boolean);
-
-      if (!words.length) {
-        const target = await readTarget(targetKey);
-        const local = await getChatSettings(ctx.jid);
-        await ctx.reply(statusText(prefix, name, local, setting, target));
-        return;
-      }
-
-      const applied = [];
-      for (const word of words) {
-        if (word === "on" || word === "off") {
-          await setChatSetting(ctx.jid, setting, word === "on");
-          applied.push(name + " → " + word.toUpperCase());
-          continue;
-        }
-
-        if (word === "dm" || word === "group" || word === "chat" || word === "both") {
-          const value = normalizeTarget(word);
-          await setChatSetting(GLOBAL_ID, targetKey, value);
-          applied.push("delivery → " + targetLabel(value));
-          continue;
-        }
-
-        const target = await readTarget(targetKey);
-        const local = await getChatSettings(ctx.jid);
-        await ctx.reply("❓ Unknown option: *" + word + "*\n\n" +
-          statusText(prefix, name, local, setting, target));
-        return;
-      }
-
-      const target = await readTarget(targetKey);
-      const local = await getChatSettings(ctx.jid);
-      await ctx.reply("✅ " + applied.join("\n✅ ") + "\n\n" +
-        statusText(prefix, name, local, setting, target));
+    const args = String(ctx.args || "").toLowerCase().split(/\s+/).filter(Boolean);
+    if (!args.length) {
+      const current = await getAntiDeleteSettings(ctx.jid);
+      await ctx.reply(statusText(ctx.config.prefix, current.enabled, current.delivery));
+      return;
     }
-  };
-}
 
-export default [
-  makeAlertCommand("antidelete", "antidel", "deltarget",
-    "Recover messages deleted for everyone and report who deleted what."),
-  makeAlertCommand("antiedit2", "antiedit", "edittarget",
-    "Report edited messages with the previous and the new text.")
-];
+    for (const word of args) {
+      if (word === "on" || word === "off") {
+        await setAntiDeleteEnabled(ctx.jid, word === "on");
+        continue;
+      }
+      if (word === "dm" || word === "group" || word === "chat" || word === "both") {
+        await setAntiDeleteDelivery(word === "group" ? "chat" : word);
+        continue;
+      }
+
+      const current = await getAntiDeleteSettings(ctx.jid);
+      await ctx.reply("❓ Unknown option: *" + word + "*\n\n" +
+        statusText(ctx.config.prefix, current.enabled, current.delivery));
+      return;
+    }
+
+    const current = await getAntiDeleteSettings(ctx.jid);
+    await ctx.reply("✅ Anti-delete settings updated.\n\n" +
+      statusText(ctx.config.prefix, current.enabled, current.delivery));
+  }
+};
