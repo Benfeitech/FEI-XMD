@@ -151,6 +151,10 @@ export function viewOncePayload(result) {
   if (["image", "video", "document"].includes(result.kind) && caption) {
     content.caption = caption.slice(0, 1000);
   }
+  if (result.kind === "image" || result.kind === "video") {
+    content.mimetype = result.media?.mimetype ||
+      (result.kind === "image" ? "image/jpeg" : "video/mp4");
+  }
   if (result.kind === "audio") {
     content.mimetype = result.media?.mimetype || "audio/mpeg";
     content.ptt = Boolean(result.media?.ptt);
