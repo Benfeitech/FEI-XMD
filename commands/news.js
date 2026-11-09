@@ -259,7 +259,7 @@ const shortcuts = [
   ["guardian", "gd", ["gd"]],
   ["npr", "npr", []],
   ["nytimes", "nyt", ["nyt"]],
-  ["foxnews", "fox", ["fox"]],
+  ["foxnews", "fox", []],
   ["skynews", "sky", ["sky"]],
   ["dw", "dw", []],
   ["punchnews", "punch", ["punch", "punchng"]]
