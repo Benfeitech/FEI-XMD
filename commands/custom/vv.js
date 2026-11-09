@@ -1,10 +1,37 @@
 import { downloadMediaMessage } from "@whiskeysockets/baileys";
 import { POWERED_FOOTER } from "../../lib/api-client.js";
-import { withChannelAttribution } from "../../lib/channel.js";
-import { getQuotedKey, getQuotedMessage, unwrapMessage } from "../../lib/utils.js";
+import {
+  getContextInfo,
+  normalizeJid,
+  unwrapMessage
+} from "../../lib/message-utils.js";
 
-// unwrapMessage already peels viewOnceMessage / viewOnceMessageV2 /
-// viewOnceMessageV2Extension, so this sees the real media underneath.
+function getQuotedMessage(ctx) {
+  const info = getContextInfo(ctx.msg?.message);
+  return info?.stanzaId && info?.quotedMessage ? info.quotedMessage : null;
+}
+
+function getQuotedKey(ctx) {
+  const info = getContextInfo(ctx.msg?.message);
+  if (!info?.stanzaId || !info?.quotedMessage) return null;
+
+  const participant = normalizeJid(info.participant || "");
+  const selfIds = [
+    ctx.sock?.user?.id,
+    ctx.sock?.user?.lid
+  ].map(normalizeJid).filter(Boolean);
+
+  const key = {
+    remoteJid: String(ctx.jid || ""),
+    id: String(info.stanzaId),
+    fromMe: Boolean(participant && selfIds.includes(participant))
+  };
+  if (participant && String(ctx.jid || "").endsWith("@g.us")) {
+    key.participant = participant;
+  }
+  return key;
+}
+
 function viewOnceMedia(message) {
   const body = unwrapMessage(message);
   if (body.imageMessage) return { kind: "image", media: body.imageMessage };
@@ -15,7 +42,14 @@ function viewOnceMedia(message) {
 }
 
 function hasViewOnceWrapper(message) {
-  return Object.keys(message || {}).some(key => /viewOnceMessage/i.test(key));
+  let current = message;
+  for (let depth = 0; current && depth < 10; depth += 1) {
+    if (Object.keys(current).some(key => /viewOnceMessage/i.test(key))) return true;
+    current = current.ephemeralMessage?.message ||
+      current.documentWithCaptionMessage?.message ||
+      current.deviceSentMessage?.message;
+  }
+  return false;
 }
 
 const MAX_RECOVERED_MEDIA_ENTRIES = 50;
@@ -24,14 +58,15 @@ const recoveredMediaCache = new Map();
 let recoveredMediaBytes = 0;
 
 function recoveredMediaKey(key) {
-  return key && key.remoteJid && key.id ? String(key.remoteJid) + ":" + String(key.id) : "";
+  return key && key.remoteJid && key.id
+    ? String(key.remoteJid) + ":" + String(key.id)
+    : "";
 }
 
 function getCachedRecoveredMedia(key) {
   const cacheKey = recoveredMediaKey(key);
   const entry = cacheKey && recoveredMediaCache.get(cacheKey);
   if (!entry) return null;
-  // Refresh insertion order to keep frequently reused media available.
   recoveredMediaCache.delete(cacheKey);
   recoveredMediaCache.set(cacheKey, entry);
   return entry.result;
@@ -39,14 +74,16 @@ function getCachedRecoveredMedia(key) {
 
 function rememberRecoveredMedia(key, result) {
   const cacheKey = recoveredMediaKey(key);
-  const buffer = result && result.buffer;
-  if (!cacheKey || !Buffer.isBuffer(buffer) || !buffer.length || buffer.length > MAX_RECOVERED_MEDIA_BYTES) return;
+  const buffer = result?.buffer;
+  if (!cacheKey || !Buffer.isBuffer(buffer) || !buffer.length ||
+      buffer.length > MAX_RECOVERED_MEDIA_BYTES) return;
 
   const previous = recoveredMediaCache.get(cacheKey);
   if (previous) {
     recoveredMediaBytes -= previous.size;
     recoveredMediaCache.delete(cacheKey);
   }
+
   recoveredMediaCache.set(cacheKey, { result, size: buffer.length });
   recoveredMediaBytes += buffer.length;
 
@@ -61,17 +98,18 @@ function rememberRecoveredMedia(key, result) {
 }
 
 async function recoverViewOnce(ctx) {
-  // Resolve the original key first, then consult the successful-recovery cache
-  // before relying on WhatsApp to include the complete quoted media payload.
-  const key = getQuotedKey(ctx.msg, ctx.sock);
+  const key = getQuotedKey(ctx);
+  if (!key) {
+    return {
+      error: "Reply to a view-once image, video, voice note or document with " +
+        ctx.config.prefix + ctx.command + "."
+    };
+  }
+
   const cachedResult = getCachedRecoveredMedia(key);
   if (cachedResult) return cachedResult;
 
-  const quoted = getQuotedMessage(ctx.msg);
-  if (!quoted) {
-    return { error: "Reply to a view-once image, video, voice note or document with " + ctx.config.prefix + ctx.command + "." };
-  }
-
+  const quoted = getQuotedMessage(ctx);
   const found = viewOnceMedia(quoted);
   if (!found) {
     return {
@@ -81,21 +119,24 @@ async function recoverViewOnce(ctx) {
     };
   }
 
-  // Keep Baileys' own re-upload request enabled for media not yet in our cache.
   let buffer;
   try {
     buffer = await downloadMediaMessage(
-      { key, message: quoted, messageTimestamp: ctx.msg.messageTimestamp },
+      { key, message: quoted, messageTimestamp: ctx.msg?.messageTimestamp },
       "buffer",
       {},
       { reuploadRequest: ctx.sock.updateMediaMessage }
     );
   } catch (error) {
-    const detail = String(error && error.message || error || "unknown download error").slice(0, 160);
+    const detail = String(error?.message || error || "unknown download error").slice(0, 160);
     return {
       error: "I couldn't download this media (Baileys: " + detail +
-        "). That does not prove it is permanently unavailable. Try again while the original sender is online."
+        "). Try again while the original sender is online."
     };
+  }
+
+  if (!Buffer.isBuffer(buffer) || !buffer.length) {
+    return { error: "WhatsApp did not return the view-once media data." };
   }
 
   const result = { ...found, buffer };
@@ -105,22 +146,24 @@ async function recoverViewOnce(ctx) {
 
 export function viewOncePayload(result) {
   const content = { [result.kind]: result.buffer };
-  const caption = String(result.media.caption || "").trim();
+  const caption = String(result.media?.caption || "").trim();
 
-  if (["image", "video", "document"].includes(result.kind) && caption) content.caption = caption.slice(0, 1000);
+  if (["image", "video", "document"].includes(result.kind) && caption) {
+    content.caption = caption.slice(0, 1000);
+  }
   if (result.kind === "audio") {
-    content.mimetype = result.media.mimetype || "audio/mpeg";
-    content.ptt = Boolean(result.media.ptt);
+    content.mimetype = result.media?.mimetype || "audio/mpeg";
+    content.ptt = Boolean(result.media?.ptt);
   }
   if (result.kind === "document") {
-    content.mimetype = result.media.mimetype || "application/octet-stream";
-    content.fileName = String(result.media.fileName || "view-once").slice(0, 180);
+    content.mimetype = result.media?.mimetype || "application/octet-stream";
+    content.fileName = String(result.media?.fileName || "view-once").slice(0, 180);
   }
   return content;
 }
 
 export function buildViewOnceCaption(result) {
-  const originalCaption = String((result && result.media && result.media.caption) || "").trim().slice(0, 750);
+  const originalCaption = String(result?.media?.caption || "").trim().slice(0, 750);
   return [
     "Media extracted from view-once successfully ✅",
     ...(originalCaption ? [originalCaption] : []),
@@ -132,16 +175,14 @@ async function sendBrandedViewOnce(ctx, result) {
   const payload = viewOncePayload(result);
   const caption = buildViewOnceCaption(result);
 
-  // WhatsApp audio messages do not support a normal caption, so send the
-  // attributed confirmation/footer as a companion text after the audio.
   if (result.kind === "audio") {
-    await ctx.send(withChannelAttribution(ctx.config, payload, true));
-    await ctx.send(withChannelAttribution(ctx.config, { text: caption }, true));
+    await ctx.send(payload);
+    await ctx.send({ text: caption });
     return;
   }
 
   payload.caption = caption;
-  await ctx.send(withChannelAttribution(ctx.config, payload, true));
+  await ctx.send(payload);
 }
 
 export default [
@@ -169,14 +210,19 @@ export default [
         return;
       }
 
-      const target = ctx.senderJid;
+      const target = normalizeJid(ctx.senderJid || "");
       if (!target) {
         await ctx.reply("⚠️ Could not resolve your WhatsApp ID for the DM.");
         return;
       }
 
-      await ctx.react("✅");
-      await ctx.sock.sendMessage(target, viewOncePayload(result));
+      try {
+        await ctx.sock.sendMessage(target, viewOncePayload(result));
+        await ctx.reply("✅ The media was sent to your private chat with FEI XMD.");
+      } catch (error) {
+        await ctx.reply("⚠️ Could not send the media to your DM: " +
+          String(error?.message || error).slice(0, 180));
+      }
     }
   }
 ];
