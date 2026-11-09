@@ -4,11 +4,18 @@ function normalizeJid(value) {
   return String(value || "").trim().toLowerCase().replace(/^(\d+):\d+@/, "$1@");
 }
 
+function participantJids(participant) {
+  return [...new Set([
+    participant?.id,
+    participant?.jid,
+    participant?.phoneNumber,
+    participant?.pn,
+    participant?.lid
+  ].map(normalizeJid).filter(Boolean))];
+}
+
 function participantJid(participant) {
-  return normalizeJid(
-    participant?.id || participant?.jid || participant?.phoneNumber ||
-    participant?.pn || participant?.lid || ""
-  );
+  return participantJids(participant)[0] || "";
 }
 
 function isAdmin(participant) {
@@ -31,7 +38,7 @@ async function requireGroupAdmin(ctx, requireBotAdmin = false) {
   const participants = Array.isArray(metadata.participants) ? metadata.participants : [];
   const sender = normalizeJid(ctx.senderJid);
   const senderIsAdmin = Boolean(ctx.owner) || participants.some(item =>
-    isAdmin(item) && participantJid(item) === sender
+    isAdmin(item) && participantJids(item).includes(sender)
   );
 
   if (!senderIsAdmin) {
@@ -44,7 +51,7 @@ async function requireGroupAdmin(ctx, requireBotAdmin = false) {
     normalizeJid(ctx.sock.user?.lid)
   ].filter(Boolean);
   const botIsAdmin = participants.some(item =>
-    isAdmin(item) && selfIds.includes(participantJid(item))
+    isAdmin(item) && participantJids(item).some(jid => selfIds.includes(jid))
   );
 
   if (requireBotAdmin && !botIsAdmin) {
