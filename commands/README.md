@@ -1,6 +1,6 @@
 # Command modules
 
-The first seven menu sections currently contain 72 commands.
+The public release contains **184 commands across 18 menu sections**.
 
 | Menu section | Command names |
 | --- | --- |
@@ -10,9 +10,22 @@ The first seven menu sections currently contain 72 commands.
 | News Desk | news, aljazeera, cnn, bbc, guardian, npr, nytimes, foxnews, skynews, dw, punchnews |
 | Group Tools | welcome, goodbye, groupinfo, groupjid, getgcpp, groupcount, groupstats, admins, tagall, link, groupname, groupdesc, close, open |
 | Downloads | aio, fb, twitter, instagram, ytmp4, tiktok, play2, ytsearch, video |
-| Fun Games | calc, poll, coinflip, dice, 8ball, choose, trivia, riddle, activity |
+| Fun Games | calc, poll, coinflip, dice, 8ball, choose, trivia, riddle, activity, pokemon |
+| Fun Mix | joke, dadjoke, progjoke, chuck, fact2, catfact, dog, cat, fox, advice, quote2, meme, numfact, history, wiki, nasa |
+| Anime Info | animemenu, anime, manga, character, charpic, staff, studio, recommend, episodes, animechars, trailer, pictures, streaming, review, genres, genre, topanime, topmanga, popular, favorite, airing, upcoming, trending, season, topchars, schedule, nextep |
+| Anime Art | randomanime, randommanga, randomchar, animequote, whatanime, waifu2, husbando, neko, kitsune |
+| Anime GIFs | angry, baka, bleh, blowkiss, blush, bored, carry, clap, confused, cry, cuddle, dance, facepalm, feed, handhold, handshake, happy, highfive |
+| Anime Reactions | hug, kabedon, kiss, lappillow, laugh, lurk, nod, nom, nope, nya, pat, peck, poke, pout, run, salute, shake |
+| Anime Moves | shocked, shrug, sip, sleep, smile, smug, spin, stare, teehee, think, thumbsup, tickle, wag, wave, wink, yawn, yeet |
+| Canvas Tools | wndwqute, canvasquote |
+| Media Tools | lyrics |
+| Chat Privacy | privacy |
+| Status Tools | statusdraft, statusideas |
+| Owner Tools | runtime |
 
-Public-release exclusions include participant-management commands (kick/add/promote/demote), group invite reset, live-presence tracking, stored group-history summaries, Meta AI participant automation, and owner/session administration. Group setting changes check the sender's group-admin role and require the bot to be an admin where WhatsApp requires it. Tag-all is admin-only and capped at 150 members. Welcome/goodbye messages are disabled by default and can be configured by group admins.
+The Channel menu section, its commands and channel-specific integrations are deliberately absent.
+
+Public-release exclusions include participant-management actions, group invite reset, live-presence tracking, private group-history collection and summaries, Meta AI participant automation, anti-delete/anti-edit monitoring, read-receipt controls, view-once recovery, automatic status viewing/reacting, fake private-message canvases and owner/session administration. The Chat Privacy command is informational only; Status Tools draft text locally; Owner Tools exposes only a read-only uptime summary. Welcome/goodbye messages are disabled by default and the group greeting settings do not collect chat history.
 
 Each JavaScript module default-exports one command object or an array of command objects. A command object uses this shape:
 
@@ -40,8 +53,7 @@ The runtime context provides:
 - ctx.owner — whether the sender matches a configured owner number.
 - ctx.connectionOpen — whether the WhatsApp connection is open.
 - ctx.buildMenu() — render the configured menu.
-- Group greeting settings are persisted separately under FEI_DATA_DIR; group chat history is not collected by these commands.
-- ctx.reply(content, options) — send a reply, quoting the source message by default.
+- ctx.reply(content, options) — send a reply, quoting the source message by default; pass { quoted: false } or false to disable quoting.
 - ctx.send(content, options) — send a message without automatically quoting the source.
 
 Use the installed normal WhiskeySockets Baileys API. Do not introduce fork-only methods or assumptions.
