@@ -103,3 +103,37 @@ test("all 18 section titles appear in the reference order with no Channel sectio
     assert.ok(menu.includes(config.prefix + command), "menu does not display " + command);
   }
 });
+
+test("uses the official FEI XMD artwork, pairing portal, newsletter identity and single owner", () => {
+  assert.equal(config.name, "FEI XMD");
+  assert.equal(config.ownerName, "Benfei Tech");
+  assert.equal(config.ownerNumber, "2349060715145");
+  assert.deepEqual(Array.from(config.ownerNumbers), ["2349060715145"]);
+  assert.equal(config.ownerNumbers.length, 1);
+  assert.equal(config.channel.name, "𝐁𝐄𝐍𝐅𝐄𝐈 𝐓𝐄𝐂𝐇 ™");
+  assert.equal(config.channel.jid, "120363430518511561@newsletter");
+  assert.equal(config.imageUrl, "https://res.cloudinary.com/dqqyvozdw/image/upload/v1792848652/arbeimjfqkkfpn9zvfhf.png");
+  assert.equal(config.botUrl, "https://fei-xmd.benfeilab.com");
+});
+
+test("the menu sends official artwork and still includes the complete text menu", async () => {
+  const { commands } = await loadCommands(path.resolve("commands"));
+  const menuCommand = commands.find(command => command.name === "menu");
+  const sent = [];
+  const ctx = {
+    config,
+    theme,
+    commands,
+    send: async payload => sent.push({ type: "media", payload }),
+    reply: async payload => sent.push({ type: "text", payload })
+  };
+
+  await menuCommand.run(ctx);
+  assert.equal(sent[0].type, "media");
+  assert.equal(sent[0].payload.image.url, config.imageUrl);
+  assert.ok(sent[0].payload.caption.includes(config.botUrl));
+  assert.equal(sent[1].type, "text");
+  assert.ok(sent[1].payload.includes("🏠 ɢᴇɴᴇʀᴀʟ"));
+  assert.ok(sent[1].payload.includes("👑 ᴏᴡɴᴇʀ ᴛᴏᴏʟs"));
+  assert.equal(sent[1].payload.includes("📢 ᴄʜᴀɴɴᴇʟ"), false);
+});
