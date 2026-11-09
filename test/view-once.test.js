@@ -43,7 +43,7 @@ test("view-once payload conversion preserves the supported WhatsApp media fields
   });
   assert.equal(image.image, imageBuffer);
   assert.equal(image.caption, "original caption");
-  assert.equal(image.mimetype, undefined);
+  assert.equal(image.mimetype, "image/jpeg");
 
   const audioBuffer = Buffer.from("audio");
   const audio = viewOncePayload({
