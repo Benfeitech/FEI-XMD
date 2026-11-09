@@ -1,12 +1,52 @@
-# FEI XMD — WhatsApp Bot by Benfei Tech
+# FEI XMD — Free WhatsApp Bot by Benfei Tech
 
-FEI XMD is a modular WhatsApp automation project developed by **Benfei Tech**. This repository is the clean public-release codebase and uses the normal **@whiskeysockets/baileys** npm package. It does not install or import the KaluLabs Baileys fork used by the separate FEI-XMD-MAIN and FEI-XMD-MINI repositories.
+[![Validate FEI XMD](https://github.com/Benfeitech/FEI-XMD/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/Benfeitech/FEI-XMD/actions/workflows/validate.yml)
+[![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Baileys](https://img.shields.io/badge/WhatsApp-Baileys-25D366?logo=whatsapp&logoColor=white)](https://github.com/WhiskeySockets/Baileys)
 
-## Project status
+<p align="center">
+  <a href="https://fei-xmd.benfeilab.com">
+    <img src="https://res.cloudinary.com/dqqyvozdw/image/upload/v1792848652/arbeimjfqkkfpn9zvfhf.png" alt="FEI XMD WhatsApp bot by Benfei Tech" width="720">
+  </a>
+</p>
 
-The runtime foundation and **184 public commands** are in place across **18 menu sections**. The command set focuses on useful tools while leaving out invasive chat/status features and privileged account controls.
+**FEI XMD** is a free, modular WhatsApp bot developed and powered by **Benfei Tech**. It brings AI chat, AI media generation, social-media downloads, group tools, news, games, anime information and other everyday utilities into WhatsApp. Pair a WhatsApp account through the [official FEI XMD pairing website](https://fei-xmd.benfeilab.com), or explore and run the bot from this public GitHub source repository.
 
-| Menu title | Public commands |
+The official product identity is **FEI XMD WhatsApp Bot | Official Pairing by Benfei Tech**. This repository contains the main FEI XMD bot source code. The pairing portal is a separate web application.
+
+## FEI XMD — official project information
+
+| Project detail | Official information |
+| --- | --- |
+| Product name | FEI XMD |
+| Full product description | Free WhatsApp bot developed and powered by Benfei Tech |
+| Developer and publisher | [Benfei Tech](https://benfeitech.com) |
+| Official pairing website | [https://fei-xmd.benfeilab.com](https://fei-xmd.benfeilab.com) |
+| Main bot source code | [github.com/Benfeitech/FEI-XMD](https://github.com/Benfeitech/FEI-XMD) |
+| WhatsApp newsletter | [𝐁𝐄𝐍𝐅𝐄𝐈 𝐓𝐄𝐂𝐇 ™](https://whatsapp.com/channel/0029VbCwtVY65yDBVR9uhJ02) |
+| YouTube | [@benfeitech](https://www.youtube.com/@benfeitech) |
+| Telegram | [t.me/benfeitech](https://t.me/benfeitech) |
+| Support | [WhatsApp Benfei Tech](https://wa.me/2349060715145) |
+| Bot artwork | [Official FEI XMD image](https://res.cloudinary.com/dqqyvozdw/image/upload/v1792848652/arbeimjfqkkfpn9zvfhf.png) |
+
+## What can FEI XMD do?
+
+FEI XMD groups its **184 public commands into 18 menu sections**. The command menu is designed for WhatsApp conversations and groups, with feature-specific permission checks where an action affects group settings.
+
+- **AI Chat:** chat with configured AI providers, ask questions, translate text, summarize content and use supported reasoning or writing tools.
+- **AI Media:** generate images from text prompts and convert text to speech using supported providers.
+- **News Desk:** retrieve current headlines from configured Nigerian and international news feeds.
+- **Group Tools:** view group information, manage basic group settings, create invite links where permitted, tag members and configure optional welcome/goodbye messages.
+- **Downloads:** request supported public media from services such as Facebook, Instagram, TikTok, X/Twitter and YouTube.
+- **Fun Games and Fun Mix:** use a calculator, polls, trivia, riddles, random choices, jokes, facts, animal images and conversation starters.
+- **Anime tools:** search anime, manga, characters, studios, rankings, schedules, recommendations and public anime art or reaction GIFs.
+- **Canvas and Media Tools:** create quote artwork and look up a song's artist with a short lyrics excerpt and a source link.
+- **Chat Privacy and Status Tools:** view the public build's privacy information and draft text or status ideas without automatically reading or posting WhatsApp statuses.
+- **Owner Tools:** view a read-only runtime uptime summary.
+
+## Public menu sections and commands
+
+| Menu section | Available commands |
 | --- | --- |
 | General | menu, help, ping, alive, owner, support, time, date, version, jid, whoami |
 | AI Chat | ai, ask, gpt, chatgpt, mathgpt, deepseek, translate, summarize, fable5, qwen, deepseek2 |
@@ -27,77 +67,152 @@ The runtime foundation and **184 public commands** are in place across **18 menu
 | Status Tools | statusdraft, statusideas |
 | Owner Tools | runtime |
 
-## Public-release boundaries
+The Channel menu section is intentionally not included. The bot configuration retains the official Benfei Tech newsletter name and newsletter JID as branding metadata only; this public command set does not add a Channel menu, channel-management commands or automatic channel-following features.
 
-This repository deliberately excludes participant-management actions, group invite reset, live-presence tracking, group-history collection and summaries, Meta AI participant automation, anti-delete/anti-edit monitoring, read-receipt controls, view-once recovery, status auto-viewing/reacting, fake private-message canvases, account blocking and owner/session administration.
+## Official FEI XMD pairing website
 
-The Channel menu section, its commands and channel-specific integrations are entirely omitted.
+Use the official [FEI XMD pairing portal](https://fei-xmd.benfeilab.com) to start a WhatsApp pairing request. The website accepts a WhatsApp phone number, requests a pairing code from the bot host, and guides the user through linking the account in WhatsApp.
 
-The **Chat Privacy** command is informational only. **Status Tools** draft text and provide ideas; they do not read or automatically post statuses. **Owner Tools** contains only a read-only uptime summary. Canvas generation is limited to quote designs. The anime GIF selection omits selected violent actions, and the anime information module filters entries marked as adult by its data source.
+To pair from a locally running copy of this repository:
 
-Group-setting commands are restricted to group admins (and the bot owner where applicable). Group invite-link retrieval is admin-only. The all-member mention command is admin-only and capped at 150 participants. Welcome/goodbye messages are disabled by default and store greeting settings rather than chat history.
+1. Start FEI XMD in a terminal.
+2. Enter the WhatsApp phone number with its country code when prompted.
+3. Open WhatsApp on that phone and go to **Settings → Linked devices → Link a device**.
+4. Choose **Link with phone number instead** and enter the pairing code shown by FEI XMD.
+5. Keep the bot process running while the linked account is connected.
 
-## Requirements
+The pairing website and the bot source code are separate project components: this repository contains the main WhatsApp bot, while the official portal provides the web-based pairing experience.
 
-- Node.js 20.9 or newer
+## Installation and local development
+
+### Requirements
+
+- Node.js **20.9 or newer**
 - npm
 - A WhatsApp account to link to FEI XMD
 
-## Install and run
+### Install
 
-1. Clone this repository.
-2. Install dependencies with npm install.
-3. Copy .env.example to .env and configure the owner number and any optional settings.
-4. Start the local runtime with npm start or npm run local.
-5. Enter the WhatsApp number with country code when prompted. The terminal displays a pairing code; enter it from WhatsApp under Linked devices.
-6. Keep the process running while the bot is connected.
+~~~bash
+git clone https://github.com/Benfeitech/FEI-XMD.git
+cd FEI-XMD
+npm install
+~~~
 
-For non-interactive hosts, set PAIRING_NUMBER in the host environment. Never commit a real .env file, WhatsApp authentication folder, database URL, provider key, or session credentials.
+Copy the example environment file and review the defaults.
 
-### Optional download provider configuration
+**Windows PowerShell:**
 
-The NabeesTech all-in-one downloader can use NABEES_API_KEY from the host environment. Leave it blank when the provider does not require a key. The Ikyyxd YouTube audio search and the configured YouTube search endpoint do not require a credential in the source code. Do not add live API keys to this repository.
+~~~powershell
+Copy-Item .env.example .env
+~~~
 
-## Architecture
+**macOS / Linux:**
 
-- index.js — application entry point.
-- local.js — interactive local pairing and graceful shutdown.
-- config/ — bot identity, owner settings and menu presentation.
-- handlers/command-loader.js — recursive command discovery, validation, alias registration and command parsing.
-- commands/ — modular commands for the 18 public menu sections.
-- lib/whatsapp-runtime.js — normal WhiskeySockets Baileys authentication, socket creation, pairing, reconnection, message intake and command dispatch.
-- lib/session-manager.js — lifecycle management for isolated local session runtimes.
-- lib/message-utils.js — safe message unwrapping, text extraction and WhatsApp JID helpers.
-- lib/owner-utils.js — owner-number normalization and checks.
-- lib/menu.js — category and explicit-name menu rendering.
-- lib/api-client.js — bounded JSON requests to allowlisted AI/media API providers, URL validation and response formatting.
-- lib/xrina-api.js — bounded image requests for the two public quote-canvas designs.
-- lib/group-greetings.js — separate per-group welcome/goodbye settings; no chat-history storage.
-- lib/math-expression.js — a small expression parser for the calculator (no eval).
-- lib/state-store.js — atomic JSON state persistence.
-- lib/database.js — optional PostgreSQL pool factory for future database-backed features.
-- test/ — Node.js built-in test suite for core utilities, command registration, news feed parsing and calculator safety.
+~~~bash
+cp .env.example .env
+~~~
 
-The runtime processes fresh notify message events only. It does not replay historical append events as commands. AI, news, anime, fun and media commands depend on external provider availability and may be unavailable when those services change or go offline.
+Start the local bot:
 
-## Command module contract
+~~~bash
+npm start
+~~~
 
-Every command module exports a default object containing a name, category, description, optional aliases and an async run(ctx) function, or an array of such objects. The command loader rejects malformed definitions and duplicate command names or aliases. See commands/README.md for the full command context.
+You can also use:
 
-## Baileys compatibility
+~~~bash
+npm run local
+~~~
 
-The project pins the normal WhiskeySockets package version 7.0.0-rc14. Runtime integrations must use the installed npm package's public API. Do not copy fork-only methods or assumptions from the other FEI XMD repositories.
+The default owner is **Benfei Tech**, with one configured owner number: **2349060715145**. The OWNER_NUMBER environment variable can override this value for a private deployment. Do not add a second owner number to this public configuration.
 
-## Checks
+### Main configuration
 
-Run these commands locally:
+| Variable | Purpose | Default |
+| --- | --- | --- |
+| BOT_NAME | WhatsApp bot display name | FEI XMD |
+| BOT_VERSION | Displayed bot version | 1.0.0 |
+| PREFIX | Command prefix | . |
+| OWNER_NAME | Configured owner/developer name | Benfei Tech |
+| OWNER_NUMBER | The single owner WhatsApp number, digits only | 2349060715145 |
+| BOT_URL | Official pairing website shown with the menu artwork | https://fei-xmd.benfeilab.com |
+| BOT_IMAGE_URL | FEI XMD menu artwork | Official Cloudinary image |
+| FEI_SESSION_DIR | Local WhatsApp authentication directory | ./auth_info_baileys |
+| FEI_DATA_DIR | Local writable data directory | ./data |
+| DATABASE_URL | Optional PostgreSQL connection for future database-backed features | Empty |
+| NABEES_API_KEY | Optional NabeesTech download provider key | Empty |
+
+Never commit a real .env file, WhatsApp authentication files, session credentials, database URLs or provider API keys.
+
+## Technology
+
+FEI XMD is built with:
+
+- **Node.js** and JavaScript ES modules.
+- **@whiskeysockets/baileys** — the normal WhiskeySockets Baileys npm package, pinned to **7.0.0-rc14**.
+- A recursive command loader that registers command modules and aliases.
+- Modular WhatsApp runtime, message utilities, session management and local state storage.
+- Bounded API clients for external AI, news, download, anime and media services.
+- Node.js built-in test runner for automated regression tests.
+
+This repository does not install the separate KaluLabs Baileys fork used by other FEI XMD project deployments.
+
+## Privacy and public-release boundaries
+
+The public FEI XMD command set deliberately avoids features that collect or expose more private account or chat information than needed. It excludes group-chat history collection and AI summaries of private conversations, live-presence tracking, view-once recovery, anti-delete/anti-edit monitoring, read-receipt controls, automatic status viewing or reacting, contact blocking and privileged owner/session administration.
+
+Group-setting commands apply permission checks. Invite-link retrieval and member tagging are restricted to group admins, and member tagging is capped. Welcome and goodbye messages are disabled by default; their settings are stored separately from chat history.
+
+The Chat Privacy command explains these boundaries. Status Tools only prepare text drafts and ideas. Owner Tools only shows basic process uptime and connection status.
+
+## Tests and validation
+
+Run the JavaScript syntax checks and test suite before submitting changes:
 
 ~~~bash
 npm run check
 npm test
 ~~~
 
-GitHub Actions runs these checks for pushes and pull requests targeting main.
+GitHub Actions runs both checks on pushes and pull requests targeting main. The test suite covers command registration, menu ordering, excluded commands, API URL validation, news parsing, state storage, message utilities and calculator safety.
+
+External providers can change their APIs, apply rate limits or become temporarily unavailable. A provider outage does not mean that the FEI XMD WhatsApp runtime itself is offline.
+
+## Frequently asked questions
+
+### What is FEI XMD?
+
+FEI XMD is a free, modular WhatsApp bot developed and powered by Benfei Tech. It provides AI chat and media tools, downloads, news, group utilities, games, anime features and other commands inside WhatsApp.
+
+### Where is the official FEI XMD pairing website?
+
+The official pairing portal is [https://fei-xmd.benfeilab.com](https://fei-xmd.benfeilab.com).
+
+### Where can I find the FEI XMD source code?
+
+The canonical main bot source repository is [https://github.com/Benfeitech/FEI-XMD](https://github.com/Benfeitech/FEI-XMD).
+
+### Who develops FEI XMD?
+
+FEI XMD is developed and powered by [Benfei Tech](https://benfeitech.com).
+
+### Does the public FEI XMD bot include a Channel menu?
+
+No. The Channel menu section and channel-management commands are intentionally excluded from this public command set. The official Benfei Tech newsletter identity remains in the bot configuration as project branding metadata.
+
+## Official links
+
+- **Pair FEI XMD:** https://fei-xmd.benfeilab.com
+- **Main FEI XMD source code:** https://github.com/Benfeitech/FEI-XMD
+- **Benfei Tech:** https://benfeitech.com
+- **WhatsApp newsletter:** https://whatsapp.com/channel/0029VbCwtVY65yDBVR9uhJ02
+- **YouTube:** https://www.youtube.com/@benfeitech
+- **Telegram:** https://t.me/benfeitech
+- **WhatsApp support:** https://wa.me/2349060715145
 
 ---
+
+**FEI XMD — WhatsApp automation by Benfei Tech.**
+
 ⚡ *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʙᴇɴꜰᴇɪ ᴛᴇᴄʜ*
