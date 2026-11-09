@@ -153,7 +153,7 @@ The default owner is **Benfei Tech**, with one configured owner number: **234906
 | FEI_SESSION_DIR | Local WhatsApp authentication directory | ./auth_info_baileys |
 | FEI_DATA_DIR | Local writable data directory | ./data |
 | DATABASE_URL | Optional PostgreSQL connection for future database-backed features | Empty |
-| NABEES_API_KEY | Optional NabeesTech download provider key | Empty |
+
 
 Never commit a real .env file, WhatsApp authentication files, session credentials, database URLs or provider API keys.
 
