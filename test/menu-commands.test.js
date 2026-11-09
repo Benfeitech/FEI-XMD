@@ -82,10 +82,11 @@ test("sensitive, invasive and channel-specific commands are not registered", asy
     "antidelete", "antidel", "antiedit", "readreceipt", "statusreact", "statusreactmode",
     "statusreactkeys", "autostatus", "sendvv", "vvinfo", "vv", "tiktokstalk",
     "fakettc", "meme2", "fakeff", "fakeffduo", "ffgirl", "unsend", "edit",
-    "block", "unblock", "disappear", "kick2", "bite", "bonk", "punch", "shoot", "slap", "tableflip"
+    "block", "unblock", "disappear", "kick2", "bite", "bonk", "shoot", "slap", "tableflip"
   ]) {
     assert.equal(lookup.has(name), false, "excluded command was registered: " + name);
   }
+  assert.equal(lookup.get("punch")?.category, "News", "the short Punch Nigeria news alias must remain a news command");
   assert.equal(theme.sections.some(section => section.key === "Channel"), false);
 });
 
