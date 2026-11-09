@@ -7,7 +7,28 @@ import theme from "../config/theme.config.js";
 import { loadCommands } from "../handlers/command-loader.js";
 import { buildMenu } from "../lib/menu.js";
 
-test("the first seven menu sections contain the selected public command batch", async () => {
+const expectedTitles = [
+  "🏠 ɢᴇɴᴇʀᴀʟ",
+  "🧠 ᴀɪ ᴄʜᴀᴛ",
+  "🎨 ᴀɪ ᴍᴇᴅɪᴀ",
+  "📰 ɴᴇᴡs ᴅᴇsᴋ",
+  "👥 ɢʀᴏᴜᴘ ᴛᴏᴏʟs",
+  "📥 ᴅᴏᴡɴʟᴏᴀᴅs",
+  "🎮 ғᴜɴ ɢᴀᴍᴇs",
+  "🎉 ғᴜɴ ᴍɪx",
+  "🌸 ᴀɴɪᴍᴇ ɪɴғᴏ",
+  "🖼 ᴀɴɪᴍᴇ ᴀʀᴛ",
+  "🎞 ᴀɴɪᴍᴇ ɢɪғs",
+  "💞 ᴀɴɪᴍᴇ ʀᴇᴀᴄᴛɪᴏɴs",
+  "⚡ ᴀɴɪᴍᴇ ᴍᴏᴠᴇs",
+  "🖼 ᴄᴀɴᴠᴀs ᴛᴏᴏʟs",
+  "🛠️ ᴍᴇᴅɪᴀ ᴛᴏᴏʟs",
+  "🔒 ᴄʜᴀᴛ ᴘʀɪᴠᴀᴄʏ",
+  "📱 sᴛᴀᴛᴜs ᴛᴏᴏʟs",
+  "👑 ᴏᴡɴᴇʀ ᴛᴏᴏʟs"
+];
+
+test("all selected public commands are loaded without collisions", async () => {
   const { commands, lookup } = await loadCommands(path.resolve("commands"));
   const count = category => commands.filter(command => command.category === category).length;
 
@@ -18,7 +39,19 @@ test("the first seven menu sections contain the selected public command batch", 
   assert.equal(count("Group"), 14);
   assert.equal(count("Downloads"), 9);
   assert.equal(count("Games"), 9);
-  assert.equal(commands.length, 72);
+  assert.equal(count("Fun"), 17);
+  assert.equal(count("Anime Info"), 16);
+  assert.equal(count("Anime Rankings"), 11);
+  assert.equal(count("Anime Random"), 4);
+  assert.equal(count("Anime Tools"), 1);
+  assert.equal(count("Anime Images"), 4);
+  assert.equal(count("Anime GIFs"), 52);
+  assert.equal(count("Canvas"), 2);
+  assert.equal(count("Media & Tools"), 1);
+  assert.equal(count("Chat & Privacy"), 1);
+  assert.equal(count("Status"), 2);
+  assert.equal(count("Owner"), 1);
+  assert.equal(commands.length, 184);
 
   for (const name of [
     "menu", "help", "ping", "alive", "owner", "support", "time", "date", "version", "jid", "whoami",
@@ -27,39 +60,45 @@ test("the first seven menu sections contain the selected public command batch", 
     "news", "aljazeera", "cnn", "bbc", "guardian", "npr", "nytimes", "foxnews", "skynews", "dw", "punchnews",
     "welcome", "goodbye", "groupinfo", "groupjid", "getgcpp", "groupcount", "groupstats", "admins", "tagall", "link", "groupname", "groupdesc", "close", "open",
     "aio", "fb", "twitter", "instagram", "ytmp4", "tiktok", "play2", "ytsearch", "video",
-    "calc", "poll", "coinflip", "dice", "8ball", "choose", "trivia", "riddle", "activity"
+    "calc", "poll", "coinflip", "dice", "8ball", "choose", "trivia", "riddle", "activity", "pokemon",
+    "joke", "dadjoke", "progjoke", "chuck", "fact2", "catfact", "dog", "cat", "fox", "advice", "quote2", "meme", "numfact", "history", "wiki", "nasa",
+    "animemenu", "anime", "manga", "character", "charpic", "staff", "studio", "recommend", "episodes", "animechars", "trailer", "pictures", "streaming", "review", "genres", "genre",
+    "topanime", "topmanga", "popular", "favorite", "airing", "upcoming", "trending", "season", "topchars", "schedule", "nextep",
+    "randomanime", "randommanga", "randomchar", "animequote", "whatanime", "waifu2", "husbando", "neko", "kitsune",
+    "angry", "baka", "bleh", "blowkiss", "blush", "bored", "carry", "clap", "confused", "cry", "cuddle", "dance", "facepalm", "feed", "handhold", "handshake", "happy", "highfive",
+    "hug", "kabedon", "kiss", "lappillow", "laugh", "lurk", "nod", "nom", "nope", "nya", "pat", "peck", "poke", "pout", "run", "salute", "shake",
+    "shocked", "shrug", "sip", "sleep", "smile", "smug", "spin", "stare", "teehee", "think", "thumbsup", "tickle", "wag", "wave", "wink", "yawn", "yeet",
+    "wndwqute", "canvasquote", "lyrics", "privacy", "statusdraft", "statusideas", "runtime"
   ]) {
     assert.ok(lookup.has(name), "missing command " + name);
   }
 });
 
-test("commands considered too sensitive for this public batch are not registered", async () => {
+test("sensitive, invasive and channel-specific commands are not registered", async () => {
   const { lookup } = await loadCommands(path.resolve("commands"));
   for (const name of [
-    "kick", "add", "promote", "demote", "revoke", "resetlink",
+    "channel", "kick", "add", "promote", "demote", "revoke", "resetlink",
     "onlineusers", "leave", "addmeta", "removemeta", "fakemsg",
-    "antidelete", "antiedit", "readreceipt"
+    "antidelete", "antidel", "antiedit", "readreceipt", "statusreact", "statusreactmode",
+    "statusreactkeys", "autostatus", "sendvv", "vvinfo", "vv", "tiktokstalk",
+    "fakettc", "meme2", "fakeff", "fakeffduo", "ffgirl", "unsend", "edit",
+    "block", "unblock", "disappear", "kick2", "bite", "bonk", "punch", "shoot", "slap", "tableflip"
   ]) {
-    assert.equal(lookup.has(name), false, "sensitive command was registered: " + name);
+    assert.equal(lookup.has(name), false, "excluded command was registered: " + name);
   }
+  assert.equal(theme.sections.some(section => section.key === "Channel"), false);
 });
 
-test("menu displays the first seven titles in the reference order", async () => {
+test("all 18 section titles appear in the reference order with no Channel section", async () => {
   const { commands } = await loadCommands(path.resolve("commands"));
   const menu = buildMenu({ commands, config, theme });
-  const titles = [
-    "🏠 ɢᴇɴᴇʀᴀʟ",
-    "🧠 ᴀɪ ᴄʜᴀᴛ",
-    "🎨 ᴀɪ ᴍᴇᴅɪᴀ",
-    "📰 ɴᴇᴡs ᴅᴇsᴋ",
-    "👥 ɢʀᴏᴜᴘ ᴛᴏᴏʟs",
-    "📥 ᴅᴏᴡɴʟᴏᴀᴅs",
-    "🎮 ғᴜɴ ɢᴀᴍᴇs"
-  ];
-  const positions = titles.map(title => menu.indexOf(title));
+  const positions = expectedTitles.map(title => menu.indexOf(title));
+
+  assert.equal(theme.sections.length, 18);
   assert.ok(positions.every(position => position >= 0));
   assert.ok(positions.every((position, index) => index === 0 || positions[index - 1] < position));
-  for (const command of ["news", "groupinfo", "aio", "trivia"]) {
-    assert.ok(menu.includes(config.prefix + command));
+  assert.equal(menu.includes("📢 ᴄʜᴀɴɴᴇʟ"), false);
+  for (const command of ["news", "groupinfo", "aio", "trivia", "joke", "anime", "waifu2", "wave", "wndwqute", "lyrics", "privacy", "statusdraft", "runtime"]) {
+    assert.ok(menu.includes(config.prefix + command), "menu does not display " + command);
   }
 });
