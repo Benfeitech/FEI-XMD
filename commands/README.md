@@ -1,12 +1,18 @@
 # Command modules
 
-The first command batch is now in place:
+The first seven menu sections currently contain 70 commands.
 
-- **General:** menu, help, ping, alive, owner, support, time, date, version, jid and whoami.
-- **AI Chat:** ai, ask, gpt, chatgpt, mathgpt, deepseek, translate, summarize, fable5, qwen and deepseek2.
-- **AI Media:** flux, pollination, tts, tts2, tts3, tts4 and tts5.
+| Menu section | Command names |
+| --- | --- |
+| General | menu, help, ping, alive, owner, support, time, date, version, jid, whoami |
+| AI Chat | ai, ask, gpt, chatgpt, mathgpt, deepseek, translate, summarize, fable5, qwen, deepseek2 |
+| AI Media | flux, pollination, tts, tts2, tts3, tts4, tts5 |
+| News Desk | news, aljazeera, cnn, bbc, guardian, npr, nytimes, foxnews, skynews, dw, punchnews |
+| Group Tools | groupinfo, groupjid, getgcpp, groupcount, groupstats, admins, tagall, link, groupname, groupdesc, close, open |
+| Downloads | aio, fb, twitter, instagram, ytmp4, tiktok, play2, ytsearch, video |
+| Fun Games | calc, poll, coinflip, dice, 8ball, choose, trivia, riddle, activity |
 
-Together these are 29 commands across the first three menu titles. Additional sections and commands will be added in later batches.
+Public-release exclusions include participant-management commands (kick/add/promote/demote), group invite reset, live-presence tracking, stored group-history summaries, Meta AI participant automation, and owner/session administration. Group setting changes check the sender's group-admin role and require the bot to be an admin where WhatsApp requires it. Tag-all is admin-only and capped at 150 members.
 
 Each JavaScript module default-exports one command object or an array of command objects. A command object uses this shape:
 
@@ -27,13 +33,13 @@ The runtime context provides:
 - ctx.jid — the chat JID.
 - ctx.senderJid — the sender JID.
 - ctx.text — the message text after removing the prefix.
-- ctx.commandName — the matched command name or alias.
+- ctx.commandName and ctx.command — the matched command name.
 - ctx.args — the remaining argument string.
 - ctx.commands — all loaded command definitions.
 - ctx.config and ctx.theme — bot configuration and menu theme.
 - ctx.owner — whether the sender matches a configured owner number.
 - ctx.connectionOpen — whether the WhatsApp connection is open.
-- ctx.buildMenu() — render the current configured menu.
+- ctx.buildMenu() — render the configured menu.
 - ctx.reply(content, options) — send a reply, quoting the source message by default.
 - ctx.send(content, options) — send a message without automatically quoting the source.
 
