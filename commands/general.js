@@ -33,8 +33,23 @@ const commands = [
     name: "menu",
     aliases: ["helpme"],
     category: "General",
-    description: "Show the FEI XMD menu and its available command sections.",
-    run: async ctx => ctx.reply(buildMenu({ commands: ctx.commands, config: ctx.config, theme: ctx.theme }))
+    description: "Show the branded FEI XMD menu and available command sections.",
+    run: async ctx => {
+      const menu = buildMenu({ commands: ctx.commands, config: ctx.config, theme: ctx.theme });
+      if (ctx.config.imageUrl) {
+        try {
+          await ctx.send({
+            image: { url: ctx.config.imageUrl },
+            caption: "🤖 *FEI XMD — WhatsApp Bot by Benfei Tech*\\n" +
+              "Official pairing portal: " + ctx.config.botUrl + "\\n" +
+              "⚡ Powered by Benfei Tech"
+          });
+        } catch (error) {
+          console.warn("FEI XMD menu artwork could not be sent; using the text menu:", error?.message || error);
+        }
+      }
+      await ctx.reply(menu);
+    }
   },
   {
     name: "help",
