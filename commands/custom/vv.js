@@ -110,12 +110,14 @@ async function recoverViewOnce(ctx) {
   if (cachedResult) return cachedResult;
 
   const quoted = getQuotedMessage(ctx);
+  if (!hasViewOnceWrapper(quoted)) {
+    return { error: "The replied-to message is not view-once media." };
+  }
+
   const found = viewOnceMedia(quoted);
   if (!found) {
     return {
-      error: hasViewOnceWrapper(quoted)
-        ? "That view-once message carries no downloadable media (view-once stickers and text are not supported)."
-        : "The replied-to message is not view-once media."
+      error: "That view-once message carries no downloadable media (view-once stickers and text are not supported)."
     };
   }
 
