@@ -36,7 +36,7 @@ test("all selected public commands are loaded without collisions", async () => {
   assert.equal(count("AI & Chat"), 11);
   assert.equal(count("AI Media"), 7);
   assert.equal(count("News"), 11);
-  assert.equal(count("Group"), 14);
+  assert.equal(count("Group"), 20);
   assert.equal(count("Downloads"), 9);
   assert.equal(count("Games"), 9);
   assert.equal(count("Fun"), 17);
@@ -49,16 +49,16 @@ test("all selected public commands are loaded without collisions", async () => {
   assert.equal(count("Canvas"), 2);
   assert.equal(count("Media & Tools"), 1);
   assert.equal(count("Chat & Privacy"), 1);
-  assert.equal(count("Status"), 2);
+  assert.equal(count("Status"), 4);
   assert.equal(count("Owner"), 1);
-  assert.equal(commands.length, 184);
+  assert.equal(commands.length, 192);
 
   for (const name of [
     "menu", "help", "ping", "alive", "owner", "support", "time", "date", "version", "jid", "whoami",
     "ai", "ask", "gpt", "chatgpt", "mathgpt", "deepseek", "translate", "summarize", "fable5", "qwen", "deepseek2",
     "flux", "pollination", "tts", "tts2", "tts3", "tts4", "tts5",
     "news", "aljazeera", "cnn", "bbc", "guardian", "npr", "nytimes", "foxnews", "skynews", "dw", "punchnews",
-    "welcome", "goodbye", "groupinfo", "groupjid", "getgcpp", "groupcount", "groupstats", "admins", "tagall", "link", "groupname", "groupdesc", "close", "open",
+    "welcome", "goodbye", "groupinfo", "groupjid", "getgcpp", "groupcount", "groupstats", "admins", "tagall", "link", "groupname", "groupdesc", "close", "open", "revoke", "resetlink", "kick", "remove", "add", "promote", "demote", "leave", "gcstatus", "groupstatus", "gcstatusdm", "dmgcstatus,
     "aio", "fb", "twitter", "instagram", "ytmp4", "tiktok", "play2", "ytsearch", "video",
     "calc", "poll", "coinflip", "dice", "8ball", "choose", "trivia", "riddle", "activity", "pokemon",
     "joke", "dadjoke", "progjoke", "chuck", "fact2", "catfact", "dog", "cat", "fox", "advice", "quote2", "meme", "numfact", "history", "wiki", "nasa",
@@ -77,8 +77,7 @@ test("all selected public commands are loaded without collisions", async () => {
 test("sensitive, invasive and channel-specific commands are not registered", async () => {
   const { lookup } = await loadCommands(path.resolve("commands"));
   for (const name of [
-    "channel", "kick", "add", "promote", "demote", "revoke", "resetlink",
-    "onlineusers", "leave", "addmeta", "removemeta", "fakemsg",
+    "channel", "onlineusers", "addmeta", "removemeta", "fakemsg",
     "antidelete", "antidel", "antiedit", "readreceipt", "statusreact", "statusreactmode",
     "statusreactkeys", "autostatus", "sendvv", "vvinfo", "vv", "tiktokstalk",
     "fakettc", "meme2", "fakeff", "fakeffduo", "ffgirl", "unsend", "edit",
