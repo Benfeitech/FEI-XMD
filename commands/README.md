@@ -1,8 +1,14 @@
 # Command modules
 
-Feature commands will be added here after the runtime foundation is verified.
+The first command batch is now in place:
 
-Each JavaScript module must default-export either one command object or an array of command objects. A command object uses this shape:
+- **General:** menu, help, ping, alive, owner, support, time, date, version, jid and whoami.
+- **AI Chat:** ai, ask, gpt, chatgpt, mathgpt, deepseek, translate, summarize, fable5, qwen and deepseek2.
+- **AI Media:** flux, pollination, tts, tts2, tts3, tts4 and tts5.
+
+Together these are 29 commands across the first three menu titles. Additional sections and commands will be added in later batches.
+
+Each JavaScript module default-exports one command object or an array of command objects. A command object uses this shape:
 
     export default {
       name: "example",
@@ -14,17 +20,21 @@ Each JavaScript module must default-export either one command object or an array
       }
     };
 
-The runtime context currently provides:
+The runtime context provides:
 
-- ctx.sock — the active Baileys socket.
+- ctx.sock — the active normal WhiskeySockets Baileys socket.
 - ctx.msg — the original Baileys message.
 - ctx.jid — the chat JID.
 - ctx.senderJid — the sender JID.
-- ctx.text — the message text after removing the command prefix.
+- ctx.text — the message text after removing the prefix.
 - ctx.commandName — the matched command name or alias.
 - ctx.args — the remaining argument string.
-- ctx.config — bot configuration.
+- ctx.commands — all loaded command definitions.
+- ctx.config and ctx.theme — bot configuration and menu theme.
 - ctx.owner — whether the sender matches a configured owner number.
+- ctx.connectionOpen — whether the WhatsApp connection is open.
+- ctx.buildMenu() — render the current configured menu.
 - ctx.reply(content, options) — send a reply, quoting the source message by default.
+- ctx.send(content, options) — send a message without automatically quoting the source.
 
 Use the installed normal WhiskeySockets Baileys API. Do not introduce fork-only methods or assumptions.
