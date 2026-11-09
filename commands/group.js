@@ -1,4 +1,5 @@
 import { numberFromJid } from "../lib/message-utils.js";
+import { getGroupGreetingSettings, setGroupGreetingSetting } from "../lib/group-greetings.js";
 
 function normalizeJid(value) {
   return String(value || "").trim().toLowerCase().replace(/^(\d+):\d+@/, "$1@");
@@ -84,11 +85,74 @@ function getMentions(message) {
   return [];
 }
 
+
+function greetingCommand(name, settingType) {
+  return {
+    name,
+    category: "Group",
+    description: "View, enable, disable or customize group " + name + " messages.",
+    run: async ctx => {
+      if (!String(ctx.jid || "").endsWith("@g.us")) {
+        await ctx.reply("Use " + ctx.config.prefix + name + " inside a WhatsApp group.");
+        return;
+      }
+
+      const raw = String(ctx.args || "").trim();
+      const current = (await getGroupGreetingSettings(ctx.jid))[settingType];
+      if (!raw) {
+        await ctx.reply([
+          "💬 *" + name.toUpperCase() + " MESSAGE*",
+          "Status: " + (current.enabled ? "ON ✅" : "OFF 🔕"),
+          "Current message:",
+          current.message,
+          "",
+          "Set message: " + ctx.config.prefix + name + " your message",
+          "Enable/disable: " + ctx.config.prefix + name + " on/off",
+          "Placeholders: {user}, {group}, {number}",
+          "Restore default: " + ctx.config.prefix + name + " reset"
+        ].join("\n"));
+        return;
+      }
+
+      const group = await requireGroupAdmin(ctx);
+      if (!group) return;
+
+      const action = raw.toLowerCase();
+      if (action === "on" || action === "off") {
+        await setGroupGreetingSetting(ctx.jid, settingType, { enabled: action === "on" });
+        await ctx.reply("✅ " + name + " messages are now " + action.toUpperCase() + ".");
+        return;
+      }
+      if (action === "reset" || action === "default") {
+        const defaultMessage = settingType === "welcome"
+          ? "🎉 Welcome {user} to *{group}*! Make yourself at home. ✨"
+          : "👋 {user} has left *{group}*. Wishing them all the best.";
+        await setGroupGreetingSetting(ctx.jid, settingType, {
+          enabled: false,
+          message: defaultMessage
+        });
+        await ctx.reply("✅ Default " + name + " message restored and left disabled.");
+        return;
+      }
+
+      const message = raw.replace(/[\u0000-\u001f]/g, " ").trim().slice(0, 700);
+      if (!message) throw new Error("Enter a non-empty greeting message.");
+      await setGroupGreetingSetting(ctx.jid, settingType, {
+        enabled: true,
+        message
+      });
+      await ctx.reply("✅ Custom " + name + " message saved and enabled.");
+    }
+  };
+}
+
 function makeGroupCommand(name, description, run, aliases = []) {
   return { name, aliases, category: "Group", description, run };
 }
 
 export default [
+  greetingCommand("welcome", "welcome"),
+  greetingCommand("goodbye", "goodbye"),
   makeGroupCommand("groupinfo", "Show group name, member count, admins and description.", async ctx => {
     const metadata = await groupMetadata(ctx);
     const participants = Array.isArray(metadata.participants) ? metadata.participants : [];
