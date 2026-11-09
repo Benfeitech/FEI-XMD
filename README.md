@@ -5,6 +5,15 @@
 [![Baileys](https://img.shields.io/badge/WhatsApp-Baileys-25D366?logo=whatsapp&logoColor=white)](https://github.com/WhiskeySockets/Baileys)
 
 <p align="center">
+  <a href="https://github.com/Benfeitech/FEI-XMD/stargazers">
+    <img src="https://img.shields.io/github/stars/Benfeitech/FEI-XMD?style=for-the-badge&logo=github&label=Star%20Project" alt="Star FEI XMD on GitHub">
+  </a>
+  <a href="https://github.com/Benfeitech/FEI-XMD/fork">
+    <img src="https://img.shields.io/github/forks/Benfeitech/FEI-XMD?style=for-the-badge&logo=github&label=Fork%20Project" alt="Fork FEI XMD on GitHub">
+  </a>
+</p>
+
+<p align="center">
   <a href="https://fei-xmd.benfeilab.com">
     <img src="https://res.cloudinary.com/dqqyvozdw/image/upload/v1792848652/arbeimjfqkkfpn9zvfhf.png" alt="FEI XMD WhatsApp bot by Benfei Tech" width="720">
   </a>
@@ -71,15 +80,18 @@ The Channel menu section is intentionally not included. The bot configuration re
 
 ## Official FEI XMD pairing website
 
-Use the official [FEI XMD pairing portal](https://fei-xmd.benfeilab.com) to start a WhatsApp pairing request. The website accepts a WhatsApp phone number, requests a pairing code from the bot host, and guides the user through linking the account in WhatsApp.
+Use the official [FEI XMD pairing portal](https://fei-xmd.benfeilab.com) for browser-based pairing, or pair directly from the interactive terminal when running this repository locally. The terminal flow asks for your WhatsApp number and prints a one-time pairing code; you do not need to edit source code or manually create an authentication file.
 
-To pair from a locally running copy of this repository:
+**Interactive terminal pairing**
 
-1. Start FEI XMD in a terminal.
-2. Enter the WhatsApp phone number with its country code when prompted.
-3. Open WhatsApp on that phone and go to **Settings → Linked devices → Link a device**.
-4. Choose **Link with phone number instead** and enter the pairing code shown by FEI XMD.
-5. Keep the bot process running while the linked account is connected.
+1. Install dependencies and start the bot with `npm start` (or `npm run local`).
+2. If no saved session exists, the terminal prompts you to enter your WhatsApp number with country code.
+3. Enter digits only, including the country code (for example, `2348012345678`). The prompt validates the number and lets you retry if it is invalid. Enter `Q` to cancel.
+4. Copy the pairing code printed in the terminal.
+5. On your phone, open **WhatsApp → Settings → Linked devices → Link a device → Link with phone number instead**.
+6. Enter the code shown in the terminal. Keep the terminal process running while FEI XMD connects.
+
+For unattended startup, set `PAIRING_NUMBER` in `.env`; this skips the interactive number prompt and requests a code for that number. Leave it empty to use the interactive terminal prompt. The pairing code is sensitive: do not share it or publish terminal screenshots containing it.
 
 The pairing website and the bot source code are separate project components: this repository contains the main WhatsApp bot, while the official portal provides the web-based pairing experience.
 
