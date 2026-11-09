@@ -1,18 +1,21 @@
 {
-  "name": "wa-fakemsg-bot",
+  "name": "fei-xmd",
   "version": "1.0.0",
-  "private": true,
+  "private": false,
+  "description": "A modular WhatsApp automation bot by Benfei Tech, built with the normal WhiskeySockets Baileys package.",
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "local": "node local.js",
+    "check": "node --check index.js && node --check local.js && node --check config/bot.config.js && node --check config/theme.config.js && node --check handlers/command-loader.js && node --check lib/whatsapp-runtime.js && node --check lib/session-manager.js && node --check lib/message-utils.js && node --check lib/owner-utils.js && node --check lib/menu.js && node --check lib/state-store.js && node --check lib/database.js && node --check test/command-loader.test.js && node --check test/message-utils.test.js && node --check test/state-store.test.js",
+    "test": "node --test"
   },
-  "engines": {
-    "node": ">=20"
-  },
+  "engines": { "node": ">=20.9.0" },
   "dependencies": {
-    "@whiskeysockets/baileys": "^7.0.0-rc.14",
-    "pino": "^9.5.0",
-    "qrcode-terminal": "^0.12.0"
+    "@whiskeysockets/baileys": "7.0.0-rc14",
+    "dotenv": "^16.6.1",
+    "pg": "^8.16.3",
+    "pino": "^9.7.0"
   }
 }
