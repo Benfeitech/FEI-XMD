@@ -40,7 +40,7 @@ The official product identity is **FEI XMD WhatsApp Bot | Official Pairing by Be
 
 ## What can FEI XMD do?
 
-FEI XMD groups its **195 public commands into 18 menu sections**. The command menu is designed for WhatsApp conversations and groups, with feature-specific permission checks where an action affects group settings.
+FEI XMD groups its **199 public commands into 18 menu sections**. The command menu is designed for WhatsApp conversations and groups, with feature-specific permission checks where an action affects group settings.
 
 - **AI Chat:** chat with configured AI providers, ask questions, translate text, summarize content and use supported reasoning or writing tools.
 - **AI Media:** generate images from text prompts and convert text to speech using supported providers.
@@ -50,7 +50,7 @@ FEI XMD groups its **195 public commands into 18 menu sections**. The command me
 - **Fun Games and Fun Mix:** use a calculator, polls, trivia, riddles, random choices, jokes, facts, animal images and conversation starters.
 - **Anime tools:** search anime, manga, characters, studios, rankings, schedules, recommendations and public anime art or reaction GIFs.
 - **Canvas and Media Tools:** create quote artwork and look up a song's artist with a short lyrics excerpt and a source link.
-- **Status Tools:** draft ordinary WhatsApp statuses, post group statuses in the active group, or select a joined group and post its status from a private chat.
+- **Status Tools:** draft ordinary WhatsApp statuses, post group statuses in the active group or from a private chat, and explicitly enable status auto-view or emoji reactions with owner-only controls.
 - **Owner Tools:** view a read-only runtime uptime summary.
 
 ## Public menu sections and commands
@@ -73,7 +73,7 @@ FEI XMD groups its **195 public commands into 18 menu sections**. The command me
 | Canvas Tools | wndwqute, canvasquote |
 | Media Tools | lyrics |
 | Chat Privacy | privacy |
-| Status Tools | statusdraft, statusideas, gcstatus, gcstatusdm |
+| Status Tools | statusdraft, statusideas, gcstatus, gcstatusdm, autostatus, autoview, statusreact, statusreactmode, statusreactkeys |
 | Owner Tools | runtime |
 
 The Channel menu section is intentionally not included. The bot configuration retains the official Benfei Tech newsletter name and newsletter JID as branding metadata only; this public command set does not add a Channel menu, channel-management commands or automatic channel-following features.
@@ -176,7 +176,7 @@ The public FEI XMD command set deliberately avoids features that collect or expo
 
 Group-setting commands apply permission checks. Invite-link retrieval and member tagging are restricted to group admins, and member tagging is capped. Welcome and goodbye messages are disabled by default; their settings are stored separately from chat history.
 
-The Chat Privacy command explains these boundaries. Status Tools can publish group statuses only when explicitly invoked by the configured owner. Group link moderation is off by default and must be enabled in each group. Owner Tools only shows basic process uptime and connection status.
+The Chat Privacy command explains these boundaries. Status Tools include owner-controlled automatic status viewing and reactions (both off by default), with a selectable rotating emoji pool and optional keyword filter. Group-status publishing is available only when explicitly invoked by the configured owner. Group link moderation is off by default and must be enabled in each group. Owner Tools only shows basic process uptime and connection status.
 
 ## Tests and validation
 
