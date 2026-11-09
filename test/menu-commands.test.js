@@ -58,7 +58,7 @@ test("all selected public commands are loaded without collisions", async () => {
     "ai", "ask", "gpt", "chatgpt", "mathgpt", "deepseek", "translate", "summarize", "fable5", "qwen", "deepseek2",
     "flux", "pollination", "tts", "tts2", "tts3", "tts4", "tts5",
     "news", "aljazeera", "cnn", "bbc", "guardian", "npr", "nytimes", "foxnews", "skynews", "dw", "punchnews",
-    "welcome", "goodbye", "groupinfo", "groupjid", "getgcpp", "groupcount", "groupstats", "admins", "tagall", "link", "groupname", "groupdesc", "close", "open", "revoke", "resetlink", "kick", "remove", "add", "promote", "demote", "leave", "gcstatus", "groupstatus", "gcstatusdm", "dmgcstatus,
+    "welcome", "goodbye", "groupinfo", "groupjid", "getgcpp", "groupcount", "groupstats", "admins", "tagall", "link", "groupname", "groupdesc", "close", "open", "revoke", "resetlink", "kick", "remove", "add", "promote", "demote", "leave", "gcstatus", "groupstatus", "gcstatusdm", "dmgcstatus",
     "aio", "fb", "twitter", "instagram", "ytmp4", "tiktok", "play2", "ytsearch", "video",
     "calc", "poll", "coinflip", "dice", "8ball", "choose", "trivia", "riddle", "activity", "pokemon",
     "joke", "dadjoke", "progjoke", "chuck", "fact2", "catfact", "dog", "cat", "fox", "advice", "quote2", "meme", "numfact", "history", "wiki", "nasa",
