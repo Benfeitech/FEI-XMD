@@ -40,8 +40,8 @@ const commands = [
         try {
           await ctx.send({
             image: { url: ctx.config.imageUrl },
-            caption: "🤖 *FEI XMD — WhatsApp Bot by Benfei Tech*\\n" +
-              "Official pairing portal: " + ctx.config.botUrl + "\\n" +
+            caption: "🤖 *FEI XMD — WhatsApp Bot by Benfei Tech*\n" +
+              "Official pairing portal: " + ctx.config.botUrl + "\n" +
               "⚡ Powered by Benfei Tech"
           });
         } catch (error) {
