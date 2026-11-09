@@ -40,17 +40,17 @@ The official product identity is **FEI XMD WhatsApp Bot | Official Pairing by Be
 
 ## What can FEI XMD do?
 
-FEI XMD groups its **184 public commands into 18 menu sections**. The command menu is designed for WhatsApp conversations and groups, with feature-specific permission checks where an action affects group settings.
+FEI XMD groups its **192 public commands into 18 menu sections**. The command menu is designed for WhatsApp conversations and groups, with feature-specific permission checks where an action affects group settings.
 
 - **AI Chat:** chat with configured AI providers, ask questions, translate text, summarize content and use supported reasoning or writing tools.
 - **AI Media:** generate images from text prompts and convert text to speech using supported providers.
 - **News Desk:** retrieve current headlines from configured Nigerian and international news feeds.
-- **Group Tools:** view group information, manage basic group settings, create invite links where permitted, tag members and configure optional welcome/goodbye messages.
+- **Group Tools:** view group information, manage group settings, create or reset invite links, tag members, add/remove/promote/demote participants, leave a group and configure optional welcome/goodbye messages.
 - **Downloads:** request supported public media from services such as Facebook, Instagram, TikTok, X/Twitter and YouTube.
 - **Fun Games and Fun Mix:** use a calculator, polls, trivia, riddles, random choices, jokes, facts, animal images and conversation starters.
 - **Anime tools:** search anime, manga, characters, studios, rankings, schedules, recommendations and public anime art or reaction GIFs.
 - **Canvas and Media Tools:** create quote artwork and look up a song's artist with a short lyrics excerpt and a source link.
-- **Chat Privacy and Status Tools:** view the public build's privacy information and draft text or status ideas without automatically reading or posting WhatsApp statuses.
+- **Status Tools:** draft ordinary WhatsApp statuses, post group statuses in the active group, or select a joined group and post its status from a private chat.
 - **Owner Tools:** view a read-only runtime uptime summary.
 
 ## Public menu sections and commands
@@ -61,7 +61,7 @@ FEI XMD groups its **184 public commands into 18 menu sections**. The command me
 | AI Chat | ai, ask, gpt, chatgpt, mathgpt, deepseek, translate, summarize, fable5, qwen, deepseek2 |
 | AI Media | flux, pollination, tts, tts2, tts3, tts4, tts5 |
 | News Desk | news, aljazeera, cnn, bbc, guardian, npr, nytimes, foxnews, skynews, dw, punchnews |
-| Group Tools | welcome, goodbye, groupinfo, groupjid, getgcpp, groupcount, groupstats, admins, tagall, link, groupname, groupdesc, close, open |
+| Group Tools | welcome, goodbye, groupinfo, groupjid, getgcpp, groupcount, groupstats, admins, tagall, link, revoke, kick, add, promote, demote, leave, groupname, groupdesc, close, open |
 | Downloads | aio, fb, twitter, instagram, ytmp4, tiktok, play2, ytsearch, video |
 | Fun Games | calc, poll, coinflip, dice, 8ball, choose, trivia, riddle, activity, pokemon |
 | Fun Mix | joke, dadjoke, progjoke, chuck, fact2, catfact, dog, cat, fox, advice, quote2, meme, numfact, history, wiki, nasa |
@@ -73,7 +73,7 @@ FEI XMD groups its **184 public commands into 18 menu sections**. The command me
 | Canvas Tools | wndwqute, canvasquote |
 | Media Tools | lyrics |
 | Chat Privacy | privacy |
-| Status Tools | statusdraft, statusideas |
+| Status Tools | statusdraft, statusideas, gcstatus, gcstatusdm |
 | Owner Tools | runtime |
 
 The Channel menu section is intentionally not included. The bot configuration retains the official Benfei Tech newsletter name and newsletter JID as branding metadata only; this public command set does not add a Channel menu, channel-management commands or automatic channel-following features.
@@ -176,7 +176,7 @@ The public FEI XMD command set deliberately avoids features that collect or expo
 
 Group-setting commands apply permission checks. Invite-link retrieval and member tagging are restricted to group admins, and member tagging is capped. Welcome and goodbye messages are disabled by default; their settings are stored separately from chat history.
 
-The Chat Privacy command explains these boundaries. Status Tools only prepare text drafts and ideas. Owner Tools only shows basic process uptime and connection status.
+The Chat Privacy command explains these boundaries. Status Tools can publish group statuses only when explicitly invoked by the configured owner. Owner Tools only shows basic process uptime and connection status.
 
 ## Tests and validation
 
