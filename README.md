@@ -5,11 +5,11 @@
 [![Baileys](https://img.shields.io/badge/WhatsApp-Baileys-25D366?logo=whatsapp&logoColor=white)](https://github.com/WhiskeySockets/Baileys)
 
 <p align="center">
-  <a href="https://github.com/Benfeitech/FEI-XMD/stargazers">
-    <img src="https://img.shields.io/github/stars/Benfeitech/FEI-XMD?style=for-the-badge&logo=github&label=Star%20Project" alt="Star FEI XMD on GitHub">
+  <a href="https://github.com/Benfeitech/FEI-XMD">
+    <img src="https://img.shields.io/badge/Star-Project-f1c40f?style=for-the-badge&logo=github&logoColor=white" alt="Star FEI XMD on GitHub">
   </a>
   <a href="https://github.com/Benfeitech/FEI-XMD/fork">
-    <img src="https://img.shields.io/github/forks/Benfeitech/FEI-XMD?style=for-the-badge&logo=github&label=Fork%20Project" alt="Fork FEI XMD on GitHub">
+    <img src="https://img.shields.io/badge/Fork-Project-2ea44f?style=for-the-badge&logo=github&logoColor=white" alt="Fork FEI XMD on GitHub">
   </a>
 </p>
 
@@ -137,7 +137,23 @@ You can also use:
 npm run local
 ~~~
 
-The default owner is **Benfei Tech**, with one configured owner number: **2349060715145**. The OWNER_NUMBER environment variable can override this value for a private deployment. Do not add a second owner number to this public configuration.\n\n### Choose any command prefix\n\nSet `PREFIX` in your `.env` file to any non-empty string you want. FEI XMD uses that exact value when detecting commands; it is not restricted to a single punctuation character. Examples:\n\n~~~dotenv\nPREFIX=!\n# or\nPREFIX=!!\n# or\nPREFIX=fei\n# or\nPREFIX=#\n~~~\n\nAfter changing the prefix, restart FEI XMD. With `PREFIX=fei`, for example, use `feimenu` instead of `.menu`. If your chosen prefix contains spaces or dotenv-special characters, wrap the value in double quotes, for example `PREFIX="my prefix "`.
+The default owner is **Benfei Tech**, with one configured owner number: **2349060715145**. The OWNER_NUMBER environment variable can override this value for a private deployment. Do not add a second owner number to this public configuration.
+
+### Choose any command prefix
+
+Set `PREFIX` in your `.env` file to any non-empty string you want. FEI XMD uses that exact value when detecting commands; it is not restricted to a single punctuation character. Examples:
+
+~~~dotenv
+PREFIX=!
+# or
+PREFIX=!!
+# or
+PREFIX=fei
+# or
+PREFIX=#
+~~~
+
+After changing the prefix, restart FEI XMD. With `PREFIX=fei`, for example, use `feimenu` instead of `.menu`. If your chosen prefix contains spaces or dotenv-special characters, wrap the value in double quotes, for example `PREFIX="my prefix "`.
 
 ### Main configuration
 
@@ -153,7 +169,6 @@ The default owner is **Benfei Tech**, with one configured owner number: **234906
 | FEI_SESSION_DIR | Local WhatsApp authentication directory | ./auth_info_baileys |
 | FEI_DATA_DIR | Local writable data directory | ./data |
 | DATABASE_URL | Optional PostgreSQL connection for future database-backed features | Empty |
-
 
 Never commit a real .env file, WhatsApp authentication files, session credentials, database URLs or provider API keys.
 
