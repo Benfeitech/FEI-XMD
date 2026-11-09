@@ -15,17 +15,17 @@ test("the first seven menu sections contain the selected public command batch", 
   assert.equal(count("AI & Chat"), 11);
   assert.equal(count("AI Media"), 7);
   assert.equal(count("News"), 11);
-  assert.equal(count("Group"), 12);
+  assert.equal(count("Group"), 14);
   assert.equal(count("Downloads"), 9);
   assert.equal(count("Games"), 9);
-  assert.equal(commands.length, 70);
+  assert.equal(commands.length, 72);
 
   for (const name of [
     "menu", "help", "ping", "alive", "owner", "support", "time", "date", "version", "jid", "whoami",
     "ai", "ask", "gpt", "chatgpt", "mathgpt", "deepseek", "translate", "summarize", "fable5", "qwen", "deepseek2",
     "flux", "pollination", "tts", "tts2", "tts3", "tts4", "tts5",
     "news", "aljazeera", "cnn", "bbc", "guardian", "npr", "nytimes", "foxnews", "skynews", "dw", "punchnews",
-    "groupinfo", "groupjid", "getgcpp", "groupcount", "groupstats", "admins", "tagall", "link", "groupname", "groupdesc", "close", "open",
+    "welcome", "goodbye", "groupinfo", "groupjid", "getgcpp", "groupcount", "groupstats", "admins", "tagall", "link", "groupname", "groupdesc", "close", "open",
     "aio", "fb", "twitter", "instagram", "ytmp4", "tiktok", "play2", "ytsearch", "video",
     "calc", "poll", "coinflip", "dice", "8ball", "choose", "trivia", "riddle", "activity"
   ]) {
