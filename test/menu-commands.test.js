@@ -47,18 +47,18 @@ test("all selected public commands are loaded without collisions", async () => {
   assert.equal(count("Anime Images"), 4);
   assert.equal(count("Anime GIFs"), 52);
   assert.equal(count("Canvas"), 2);
-  assert.equal(count("Media & Tools"), 1);
-  assert.equal(count("Chat & Privacy"), 1);
+  assert.equal(count("Media & Tools"), 3);
+  assert.equal(count("Chat & Privacy"), 2);
   assert.equal(count("Status"), 8);
   assert.equal(count("Owner"), 1);
-  assert.equal(commands.length, 199);
+  assert.equal(commands.length, 202);
 
   for (const name of [
     "menu", "help", "ping", "alive", "owner", "support", "time", "date", "version", "jid", "whoami",
     "ai", "ask", "gpt", "chatgpt", "mathgpt", "deepseek", "translate", "summarize", "fable5", "qwen", "deepseek2",
     "flux", "pollination", "tts", "tts2", "tts3", "tts4", "tts5",
     "news", "aljazeera", "cnn", "bbc", "guardian", "npr", "nytimes", "foxnews", "skynews", "dw", "punchnews",
-    "welcome", "goodbye", "groupinfo", "groupjid", "getgcpp", "groupcount", "groupstats", "admins", "tagall", "link", "groupname", "groupdesc", "close", "open", "revoke", "resetlink", "kick", "remove", "add", "promote", "demote", "leave", "antilink", "warn", "warnlist", "gcstatus", "groupstatus", "gcstatusdm", "dmgcstatus", "autostatus", "autoview", "statusreact", "statusreactmode", "statusreactkeys",
+    "welcome", "goodbye", "groupinfo", "groupjid", "getgcpp", "groupcount", "groupstats", "admins", "tagall", "link", "groupname", "groupdesc", "close", "open", "revoke", "resetlink", "kick", "remove", "add", "promote", "demote", "leave", "antilink", "warn", "warnlist", "gcstatus", "groupstatus", "gcstatusdm", "dmgcstatus", "autostatus", "autoview", "statusreact", "statusreactmode", "statusreactkeys", "antidelete", "antidel", "vv", "vv2",
     "aio", "fb", "twitter", "instagram", "ytmp4", "tiktok", "play2", "ytsearch", "video",
     "calc", "poll", "coinflip", "dice", "8ball", "choose", "trivia", "riddle", "activity", "pokemon",
     "joke", "dadjoke", "progjoke", "chuck", "fact2", "catfact", "dog", "cat", "fox", "advice", "quote2", "meme", "numfact", "history", "wiki", "nasa",
@@ -78,7 +78,7 @@ test("sensitive, invasive and channel-specific commands are not registered", asy
   const { lookup } = await loadCommands(path.resolve("commands"));
   for (const name of [
     "channel", "onlineusers", "addmeta", "removemeta", "fakemsg",
-    "antidelete", "antidel", "antiedit", "readreceipt", "sendvv", "vvinfo", "vv", "tiktokstalk",
+    "antiedit", "readreceipt", "sendvv", "vvinfo", "tiktokstalk",
     "fakettc", "meme2", "fakeff", "fakeffduo", "ffgirl", "unsend", "edit",
     "block", "unblock", "disappear", "kick2", "bite", "bonk", "shoot", "slap", "tableflip"
   ]) {
