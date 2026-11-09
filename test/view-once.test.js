@@ -34,6 +34,35 @@ test("view-once recovery returns a useful reply when the command has no quoted m
   assert.match(replies[0], /Reply to a view-once/i);
 });
 
+test("view-once recovery rejects ordinary media that has no view-once wrapper", async () => {
+  const { lookup } = await loadCommands();
+  const replies = [];
+  const ctx = {
+    command: "vv",
+    args: "",
+    jid: "2348000000000@s.whatsapp.net",
+    senderJid: "2348000000000@s.whatsapp.net",
+    msg: {
+      key: { remoteJid: "2348000000000@s.whatsapp.net", id: "command-2" },
+      message: {
+        extendedTextMessage: {
+          text: ".vv",
+          contextInfo: {
+            stanzaId: "ordinary-image-1",
+            quotedMessage: { imageMessage: { mimetype: "image/jpeg" } }
+          }
+        }
+      }
+    },
+    sock: { user: { id: "2348000000000@s.whatsapp.net" } },
+    config: { prefix: "." },
+    reply: async value => replies.push(String(value))
+  };
+
+  await lookup.get("vv").run(ctx);
+  assert.match(replies[0], /not view-once media/i);
+});
+
 test("view-once payload conversion preserves the supported WhatsApp media fields", () => {
   const imageBuffer = Buffer.from("image");
   const image = viewOncePayload({
