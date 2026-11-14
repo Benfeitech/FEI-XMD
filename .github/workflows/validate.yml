@@ -1,4 +1,4 @@
-name: Validate FEI XMD
+name: Validate black XMD
 
 on:
   push:
