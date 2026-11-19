@@ -1,4 +1,4 @@
-import { buildMenu } from "../lib/menu.js";
+impo buildMenu } from "../lib/menu.js";
 
 function formatDuration(seconds) {
   let remaining = Math.max(0, Math.floor(Number(seconds) || 0));
@@ -33,7 +33,7 @@ const commands = [
     name: "menu",
     aliases: ["helpme"],
     category: "General",
-    description: "Show the branded FEI XMD menu and available command sections.",
+    description: "Show the branded Ethan botmenu and available command sections.",
     run: async ctx => {
       const menu = buildMenu({ commands: ctx.commands, config: ctx.config, theme: ctx.theme });
       if (ctx.config.imageUrl) {
@@ -42,10 +42,10 @@ const commands = [
             image: { url: ctx.config.imageUrl },
             caption: "🤖 *FEI XMD — WhatsApp Bot by Benfei Tech*\n" +
               "Official pairing portal: " + ctx.config.botUrl + "\n" +
-              "⚡ Powered by Benfei Tech"
+              "⚡ Powered by EthanTech"
           });
         } catch (error) {
-          console.warn("FEI XMD menu artwork could not be sent; using the text menu:", error?.message || error);
+          console.warn("Ethan bot menu artwork could not be sent; using the text menu:", error?.message || error);
         }
       }
       await ctx.reply(menu);
@@ -83,12 +83,12 @@ const commands = [
       const timestamp = messageTimestampMs(ctx.msg);
       const responseMs = timestamp === null ? null : Math.max(0, Date.now() - timestamp);
       await ctx.reply([
-        "╭━━〔 🏓 FEI XMD · PONG 〕━━┈⊷",
-        "┃ ✦ Status: " + (ctx.connectionOpen ? "Online 🟢" : "Connecting 🟡"),
-        "┃ ✦ Response: " + (responseMs === null ? "Unavailable" : responseMs + " ms"),
-        "┃ ✦ Uptime: " + formatDuration(process.uptime()),
-        "┃ ✦ Version: " + ctx.config.version,
-        "╰━━━━━━━━━━━━━━━━━━━━━━┈⊷"
+        "╔══〔 🏓 FEI XMD · PONG 〕══┈◈",
+        "║ ✦ Status: " + (ctx.connectionOpen ? "Online 🟢" : "Connecting 🟡"),
+        "║ ✦ Response: " + (responseMs === null ? "Unavailable" : responseMs + " ms"),
+        "║ ✦ Uptime: " + formatDuration(process.uptime()),
+        "║ ✦ Version: " + ctx.config.version,
+        "╚══════════════════════┈◈"
       ].join("\n"));
     }
   },
@@ -156,7 +156,7 @@ const commands = [
         month: "long",
         year: "numeric"
       }).format(new Date());
-      await ctx.reply("📅 Date in Nigeria: " + value);
+      await ctx.reply("📅 Date in Uganda: " + value);
     }
   },
   {
@@ -167,7 +167,7 @@ const commands = [
       await ctx.reply(
         "🤖 " + ctx.config.name + " v" + ctx.config.version +
         "\n🟢 Status: " + (ctx.connectionOpen ? "Online" : "Connecting") +
-        "\n🔐 Mode: " + String(ctx.mode || "public").toUpperCase() +
+        "\n🔐 Mode: " + String(ctx.mode || "private").toUpperCase() +
         "\n📦 Baileys: official WhiskeySockets npm package"
       );
     }
