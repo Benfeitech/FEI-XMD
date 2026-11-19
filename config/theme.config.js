@@ -1,12 +1,12 @@
 export default Object.freeze({
-  botTitle: "🤖 ꜰᴇɪ xᴍᴅ ʙᴏᴛ",
+  botTitle: "😷 Ethan Bot",
   menu: {
-    top: "╭━━〔 ",
-    titleEnd: " 〕━━┈⊷",
-    infoLine: "┃ ✫ ",
-    itemLine: "┃ ✫✧│ ",
-    blankLine: "┃",
-    bottom: "╰━━━━━━━━━━━━┈⊷"
+    top: "╔══〔 ",
+    titleEnd: " 〕══┈◈",
+    infoLine: "║ ✦ ",
+    itemLine: "║ ✦✧│ ",
+    blankLine: "║",
+    bottom: "╚════════════┈◈"
   },
   sections: [
     { key: "General", title: "🏠 ɢᴇɴᴇʀᴀʟ", categories: ["General"] },
